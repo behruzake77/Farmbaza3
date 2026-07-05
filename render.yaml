@@ -9,6 +9,8 @@ services:
     startCommand: uvicorn webapp.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /
     envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.10"                  # rapidfuzz va boshqa paketlar uchun barqaror versiya
       - key: USE_SQLITE
         value: "False"                    # Render da ALBATTA PostgreSQL ishlatiladi
       - key: DATABASE_URL
