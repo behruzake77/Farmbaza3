@@ -6,7 +6,9 @@
   <div class="wrap">
 
     <nav class="breadcrumb">
-      <a href="/">Bosh sahifa</a>
+      <a href="/" style="display:flex;align-items:center;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </a>
       <span class="sep">›</span>
       {% if medicine.category %}
       <a href="/qidiruv?q={{ medicine.category }}">{{ medicine.category }}</a>
@@ -47,11 +49,6 @@
             {% endif %}
             {% if medicine.price_range_str %}
             <div class="price-range">Dorixonalarda: {{ medicine.price_range_str }}</div>
-            {% endif %}
-            {% if medicine.prescription is not none %}
-            <div class="rx-badge {% if medicine.prescription %}rx-yes{% else %}rx-no{% endif %}">
-              {% if medicine.prescription %}⛔ Retsept kerak{% else %}✅ Retseptsiz sotiladi{% endif %}
-            </div>
             {% endif %}
             {% if medicine.source_url %}
             <a class="gopharm-link" href="{{ medicine.source_url }}" target="_blank" rel="noopener">
@@ -96,76 +93,61 @@
 
         <div class="detail-header">
           <div class="badge-row">
+            {% if medicine.prescription is not none %}
+            <span class="rx-badge {% if medicine.prescription %}rx-yes{% else %}rx-no{% endif %}">
+              {% if medicine.prescription %}⛔ Retsept kerak{% else %}✅ Retseptsiz sotiladi{% endif %}
+            </span>
+            {% endif %}
             {% if medicine.category %}<span class="badge">{{ medicine.category }}</span>{% endif %}
             {% if medicine.t136_filial %}<span class="badge badge-t136">T136</span>{% endif %}
           </div>
           <h1 class="detail-title">{{ medicine.name }}</h1>
         </div>
 
-        <!-- ACCORDION -->
-        <div class="accordion">
+        <!-- TABS -->
+        {% set has_composition = medicine.composition %}
+        {% set has_description = medicine.description %}
+        {% set has_frequency = medicine.frequency %}
+        {% set default_tab = 'description' if has_description else ('composition' if has_composition else ('frequency' if has_frequency else 'empty')) %}
+        <div class="tabs-nav">
+          {% if has_description %}<button class="tab-btn" data-tab="description" onclick="showTab('description')">Ko'rsatmalar</button>{% endif %}
+          {% if has_composition %}<button class="tab-btn" data-tab="composition" onclick="showTab('composition')">Tarkibi</button>{% endif %}
+          {% if has_frequency %}<button class="tab-btn" data-tab="frequency" onclick="showTab('frequency')">Qabul tartibi</button>{% endif %}
+          {% if not has_description and not has_composition and not has_frequency %}<button class="tab-btn" data-tab="empty" onclick="showTab('empty')">Ma'lumotlar</button>{% endif %}
+          <button class="tab-btn" data-tab="warning" onclick="showTab('warning')">Ehtiyot choralar</button>
+        </div>
 
-          {% if medicine.composition %}
-          <div class="acc-item" id="ai-composition">
-            <button class="acc-head" onclick="tog('composition')">
-              <span class="acc-icon">💊</span><span class="acc-title">Tarkibi</span>
-              <svg class="acc-arr" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="acc-body" id="b-composition">{{ medicine.composition }}</div>
-          </div>
+        <div class="tab-panels">
+          {% if has_description %}
+          <div class="tab-panel acc-body-rich" id="tp-description">{{ medicine.description | safe }}</div>
           {% endif %}
 
-          {% if medicine.description %}
-          <div class="acc-item open" id="ai-description">
-            <button class="acc-head" onclick="tog('description')">
-              <span class="acc-icon">📋</span><span class="acc-title">Ko'rsatmalar</span>
-              <svg class="acc-arr" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="acc-body acc-body-rich" id="b-description">{{ medicine.description | safe }}</div>
-          </div>
+          {% if has_composition %}
+          <div class="tab-panel" id="tp-composition" style="white-space:pre-wrap;">{{ medicine.composition }}</div>
           {% endif %}
 
-          {% if medicine.frequency %}
-          <div class="acc-item" id="ai-frequency">
-            <button class="acc-head" onclick="tog('frequency')">
-              <span class="acc-icon">⏱️</span><span class="acc-title">Qabul tartibi</span>
-              <svg class="acc-arr" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="acc-body" id="b-frequency">{{ medicine.frequency }}</div>
-          </div>
+          {% if has_frequency %}
+          <div class="tab-panel" id="tp-frequency" style="white-space:pre-wrap;">{{ medicine.frequency }}</div>
           {% endif %}
 
-          {% if not medicine.description and not medicine.composition %}
-          <div class="acc-item open" id="ai-empty">
-            <button class="acc-head" onclick="tog('empty')">
-              <span class="acc-icon">📋</span><span class="acc-title">Ma'lumotlar</span>
-              <svg class="acc-arr" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="acc-body" id="b-empty">
-              <div class="no-info-box">
-                <p>Bu dori haqida batafsil ma'lumot hozircha mavjud emas.</p>
-                {% if medicine.source_url %}
-                <a href="{{ medicine.source_url }}" target="_blank">Gopharm saytida ko'rish →</a>
-                {% endif %}
-              </div>
+          {% if not has_description and not has_composition and not has_frequency %}
+          <div class="tab-panel" id="tp-empty">
+            <div class="no-info-box">
+              <p>Bu dori haqida batafsil ma'lumot hozircha mavjud emas.</p>
+              {% if medicine.source_url %}
+              <a href="{{ medicine.source_url }}" target="_blank">Gopharm saytida ko'rish →</a>
+              {% endif %}
             </div>
           </div>
           {% endif %}
 
-          <div class="acc-item" id="ai-warning">
-            <button class="acc-head" onclick="tog('warning')">
-              <span class="acc-icon">⚠️</span><span class="acc-title">Ehtiyot choralar</span>
-              <svg class="acc-arr" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="acc-body" id="b-warning">
-              <div class="warning-box">
-                <p>⚠️ Dorilarni qabul qilishdan oldin shifokor yoki farmatsevt bilan maslahatlashing.</p>
-                <p>Bolalarga berishdan avval pediatr bilan maslahatlashing.</p>
-                <p>Dori nomlarini va ko'rsatmalarni o'zboshimchalik bilan almashtirmang.</p>
-              </div>
+          <div class="tab-panel" id="tp-warning">
+            <div class="warning-box">
+              <p>⚠️ Dorilarni qabul qilishdan oldin shifokor yoki farmatsevt bilan maslahatlashing.</p>
+              <p>Bolalarga berishdan avval pediatr bilan maslahatlashing.</p>
+              <p>Dori nomlarini va ko'rsatmalarni o'zboshimchalik bilan almashtirmang.</p>
             </div>
           </div>
-
         </div>
 
         <!-- Admin: gopharm dorini saqlash -->
@@ -245,5 +227,17 @@ function tog(key) {
   const el = document.getElementById('ai-' + key);
   if (el) el.classList.toggle('open');
 }
+function showTab(key) {
+  document.querySelectorAll('.tab-btn').forEach(function (btn) {
+    btn.classList.toggle('active', btn.dataset.tab === key);
+  });
+  document.querySelectorAll('.tab-panel').forEach(function (panel) {
+    panel.classList.toggle('active', panel.id === 'tp-' + key);
+  });
+}
+document.addEventListener('DOMContentLoaded', function () {
+  var firstTab = document.querySelector('.tab-btn');
+  if (firstTab) showTab(firstTab.dataset.tab);
+});
 </script>
 {% endblock %}

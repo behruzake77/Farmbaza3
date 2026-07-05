@@ -74,7 +74,7 @@
         <td>
           {% if m.image_url %}
           <img class="table-thumb" src="{{ m.image_url }}"
-               onerror="this.outerHTML='<div class=&quot;table-thumb-fallback&quot;>{{ (m.name[:1] or &quot;?&quot;)|upper }}</div>'">
+               onerror="this.outerHTML='<div class=&quot;table-thumb-fallback&quot;>{{ (m.name[:1] if m.name else "?")|upper }}</div>'">
           {% else %}
           <div class="table-thumb-fallback">{{ m.name[0]|upper if m.name else "?" }}</div>
           {% endif %}

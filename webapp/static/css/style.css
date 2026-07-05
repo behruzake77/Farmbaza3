@@ -484,16 +484,34 @@ img { display: block; max-width: 100%; }
   border-radius: var(--radius); overflow: hidden;
   background: var(--surface); box-shadow: var(--shadow-xs);
 }
-.side-row { display: flex; flex-direction: column; padding: 8px 14px; border-bottom: 1px solid var(--line); gap: 1px; }
+.side-row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--line); }
 .side-row:last-child { border-bottom: none; }
-.side-label { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; }
-.side-val { font-size: 13px; color: var(--text-1); }
-.side-val.mono { font-family: monospace; font-size: 12px; }
+.side-label { font-size: 12.5px; color: var(--text-muted); flex-shrink: 0; }
+.side-val { font-size: 13px; font-weight: 700; color: var(--text-1); text-align: right; }
+.side-val.mono { font-family: monospace; font-size: 12px; font-weight: 600; }
 
 .detail-header { margin-bottom: 20px; }
 .detail-title { font-size: clamp(20px, 4vw, 28px); font-weight: 800; margin-top: 8px; line-height: 1.18; }
 
-/* Accordion */
+/* Tabs */
+.tabs-nav {
+  display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 2px solid var(--line);
+  margin-bottom: 18px;
+}
+.tab-btn {
+  padding: 10px 16px; background: none; border: none; cursor: pointer;
+  font-size: 14.5px; font-weight: 600; color: var(--text-muted);
+  border-bottom: 2px solid transparent; margin-bottom: -2px;
+  transition: color var(--transition), border-color var(--transition);
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+.tab-panels { position: relative; }
+.tab-panel { display: none; font-size: 14px; line-height: 1.75; color: var(--text-2); }
+.tab-panel.active { display: block; animation: fadeIn .18s ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* Accordion (legacy, kept for other pages) */
 .accordion { display: flex; flex-direction: column; gap: 7px; }
 .acc-item { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--surface); }
 .acc-head {
