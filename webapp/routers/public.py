@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.config import settings
 from app.services.medicine_service import MedicineService
 from app.services.category_service import CategoryService
-from app.services.gopharm_service import GopharmService
+from app.services.gopharm_service import GopharmService, split_description_sections
 from webapp.dependencies import get_current_admin_optional, get_db
 
 router = APIRouter()
@@ -52,6 +52,37 @@ def _gp_to_medicine_ctx(drug, local=None):
 
 def _letter(name: str) -> str:
     return (name or "?").strip()[0].upper()
+
+
+def _build_doc_sections(medicine) -> list[dict]:
+    """Dori tavsifini chap menyu + o'ng kontent uchun bo'limlarga ajratadi."""
+    sections: list[dict] = []
+    description = getattr(medicine, "description", None)
+    if description:
+        sections.extend(split_description_sections(description))
+
+    used_ids = {s["id"] for s in sections}
+
+    def _add(id_: str, title: str, html: str):
+        if not html:
+            return
+        uid = id_
+        n = 2
+        while uid in used_ids:
+            uid = f"{id_}-{n}"
+            n += 1
+        used_ids.add(uid)
+        sections.append({"id": uid, "title": title, "html": html})
+
+    composition = getattr(medicine, "composition", None)
+    if composition:
+        _add("tarkibi", "Tarkibi", f"<p style='white-space:pre-wrap'>{composition}</p>")
+
+    frequency = getattr(medicine, "frequency", None)
+    if frequency:
+        _add("qabul-tartibi", "Qabul tartibi", f"<p style='white-space:pre-wrap'>{frequency}</p>")
+
+    return sections
 
 
 # ── Bosh sahifa ──────────────────────────────────────────────────────────────
@@ -183,6 +214,7 @@ async def medicine_detail(request: Request, medicine_id: int,
         "placeholder":      _letter(medicine.name),
         "analogues":        analogues,
         "analogue_prefix":  "/dori/",
+        "doc_sections":     _build_doc_sections(medicine),
     })
 
 
@@ -248,6 +280,7 @@ async def gopharm_medicine_detail(request: Request, drug_id: int,
         "is_t136":           bool(local.t136_filial),
         "analogues":         drug.analogs,
         "analogue_prefix":   "/gp/",
+        "doc_sections":      _build_doc_sections(drug),
     })
 
 

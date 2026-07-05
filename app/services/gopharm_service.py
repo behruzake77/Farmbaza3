@@ -78,6 +78,52 @@ def _rich_html(html: str) -> str:
     return result if result else _strip_html(html)
 
 
+_SECTION_HEAD_RE = re.compile(r"<h[234]>(.*?)</h[234]>", re.IGNORECASE | re.DOTALL)
+
+
+def split_description_sections(html: str) -> list[dict]:
+    """Tozalangan tavsif HTML'ini <h2>/<h3>/<h4> sarlavhalari bo'yicha bo'laklarga ajratadi.
+
+    Har bir bo'lak {"id": slug, "title": matn, "html": kontent} shaklida qaytadi.
+    Sarlavhasiz boshlang'ich matn bo'lsa, u "Umumiy ma'lumot" nomi bilan alohida bo'lak bo'ladi.
+    """
+    if not html:
+        return []
+
+    matches = list(_SECTION_HEAD_RE.finditer(html))
+    if not matches:
+        return [{"id": "umumiy", "title": "Umumiy ma'lumot", "html": html}]
+
+    sections: list[dict] = []
+    used_ids: set = set()
+
+    def _slug(text: str, idx: int) -> str:
+        base = re.sub(r"[^a-z0-9]+", "-", _strip_html(text).lower()).strip("-") or f"bolim-{idx}"
+        base = base[:40]
+        candidate = base
+        n = 2
+        while candidate in used_ids:
+            candidate = f"{base}-{n}"
+            n += 1
+        used_ids.add(candidate)
+        return candidate
+
+    lead = html[: matches[0].start()].strip()
+    if lead and _strip_html(lead):
+        sections.append({"id": _slug("Umumiy ma'lumot", 0), "title": "Umumiy ma'lumot", "html": lead})
+
+    for i, m in enumerate(matches):
+        title = _strip_html(m.group(1))
+        start = m.end()
+        end = matches[i + 1].start() if i + 1 < len(matches) else len(html)
+        body = html[start:end].strip()
+        if not title:
+            continue
+        sections.append({"id": _slug(title, i + 1), "title": title, "html": body})
+
+    return sections
+
+
 try:
     from loguru import logger as _log
 except ImportError:
