@@ -5,6 +5,7 @@ packages = ["cargo", "libiconv", "libxcrypt", "postgresql", "rapidfuzz-cpp", "ru
 
 [agent]
 expertMode = true
+stack = "BEST_EFFORT_FALLBACK"
 
 [workflows]
 runButton = "Project"
