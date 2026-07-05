@@ -34,6 +34,50 @@ def _strip_html(html: str) -> str:
     return re.sub(r"\s+", " ", s.get_text()).strip()
 
 
+_ALLOWED_TAGS = {"h2", "h3", "h4", "p", "ul", "ol", "li", "strong", "b", "em", "i", "br"}
+
+
+class _HTMLSanitizer(HTMLParser):
+    """GoPharm tavsifidagi HTML tuzilishini (sarlavhalar, ro'yxatlar) saqlab,
+    faqat xavfsiz teglarni qoldiradi — matn "tekis" bo'lib qolmasligi uchun."""
+
+    def __init__(self):
+        super().__init__()
+        self._out: list[str] = []
+        self._skip_stack: list[str] = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag in _ALLOWED_TAGS:
+            self._out.append(f"<{tag}>")
+        elif tag not in ("html", "body", "div", "span", "table", "tr", "td", "th", "tbody", "thead"):
+            self._skip_stack.append(tag)
+
+    def handle_endtag(self, tag):
+        if tag in _ALLOWED_TAGS:
+            self._out.append(f"</{tag}>")
+
+    def handle_data(self, data):
+        self._out.append(data.replace("&nbsp;", " "))
+
+    def get_html(self) -> str:
+        html = "".join(self._out)
+        html = re.sub(r"[ \t]+", " ", html)
+        html = re.sub(r"\n\s*\n+", "\n", html)
+        html = re.sub(r"(<p>\s*</p>)+", "", html)
+        html = re.sub(r"(<br>\s*){2,}", "<br>", html)
+        return html.strip()
+
+
+def _rich_html(html: str) -> str:
+    """Tavsifni tuzilishini saqlagan holda tozalaydi (sarlavha/ro'yxat qoladi)."""
+    if not html:
+        return ""
+    s = _HTMLSanitizer()
+    s.feed(html)
+    result = s.get_html()
+    return result if result else _strip_html(html)
+
+
 try:
     from loguru import logger as _log
 except ImportError:
@@ -66,6 +110,15 @@ class GopharmDrug:
     prescription: bool = False
     analogs: list = field(default_factory=list)  # GoPharm detail API'dan keladi
 
+    brand: Optional[str] = None
+    rating: Optional[float] = None
+    quantity_per_pack: Optional[str] = None
+    price_min: Optional[float] = None
+    price_max: Optional[float] = None
+    discount: int = 0
+    discount_label: Optional[str] = None
+    pharm_group: Optional[str] = None
+
     @property
     def detail_url(self) -> str:
         return f"/gp/{self.id}"
@@ -81,6 +134,30 @@ class GopharmDrug:
         return f"{self.price:,.0f} so'm".replace(",", " ")
 
     @property
+    def old_price_str(self) -> str:
+        """Chegirmagacha bo'lgan narx (agar discount bo'lsa)."""
+        if not self.discount or not self.price:
+            return ""
+        old = self.price / (1 - self.discount / 100)
+        return f"{old:,.0f} so'm".replace(",", " ")
+
+    @property
+    def price_range_str(self) -> str:
+        """Turli dorixonalardagi narx oralig'i (min-max farqli bo'lsa)."""
+        if not self.price_min or not self.price_max or self.price_min == self.price_max:
+            return ""
+        return (
+            f"{self.price_min:,.0f} — {self.price_max:,.0f} so'm"
+        ).replace(",", " ")
+
+    @property
+    def rating_stars(self) -> str:
+        if not self.rating:
+            return ""
+        full = int(round(self.rating))
+        return "★" * full + "☆" * (5 - full)
+
+    @property
     def placeholder(self) -> str:
         return (self.name or "?")[0].upper()
 
@@ -89,7 +166,10 @@ def _from_list(d: dict) -> GopharmDrug:
     cat  = d.get("category") or {}
     mfr  = d.get("manufacturer") or {}
     cntry = d.get("country") or {}
+    brand = d.get("brand_uz") or d.get("brand") or {}
     price = d.get("price")
+    price_min = d.get("price_min")
+    price_max = d.get("price_max")
     return GopharmDrug(
         id          = d["id"],
         name        = d.get("name") or "",
@@ -103,13 +183,22 @@ def _from_list(d: dict) -> GopharmDrug:
         dosage_form = (d.get("unit_uz") or d.get("unit") or "").strip("-") or None,
         composition = d.get("international_name_uz") or d.get("international_name"),
         prescription= bool(d.get("is_recept")),
+        brand              = brand.get("name") if isinstance(brand, dict) else None,
+        rating             = d.get("rating"),
+        quantity_per_pack  = d.get("quantity_per_pack") or None,
+        price_min          = float(price_min) if price_min else None,
+        price_max          = float(price_max) if price_max else None,
+        discount           = int(d.get("discount") or 0),
+        discount_label     = d.get("discount_label"),
+        pharm_group        = d.get("pharm_group"),
     )
 
 
 def _from_detail(d: dict) -> GopharmDrug:
     drug = _from_list(d)
     drug.name        = d.get("name_uz") or d.get("name") or drug.name
-    drug.description = _strip_html(d.get("description") or "")
+    drug.description = _rich_html(d.get("description") or "")
+    drug.rating      = d.get("rating") or drug.rating
     # GoPharm detail API o'zida analoglarni qaytaradi — alohida so'rov kerak emas
     drug.analogs     = [_from_list(a) for a in (d.get("analog") or []) if a.get("id")]
     return drug

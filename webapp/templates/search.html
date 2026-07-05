@@ -32,9 +32,13 @@
             {% if d.t136_filial %}<span class="badge badge-t136">T136</span>{% endif %}
           </div>
           <div class="med-name">{{ d.name }}</div>
+          {% if d.rating_stars %}
+          <div class="med-rating"><span class="rating-stars">{{ d.rating_stars }}</span><span class="rating-num">{{ d.rating }}</span></div>
+          {% endif %}
           <div class="med-footer">
             <span class="med-mfr">{{ d.manufacturer or "" }}</span>
-            {% if d.age_group %}<span class="med-price">{{ d.age_group }}</span>{% endif %}
+            {% if d.price_str %}<span class="med-price">{{ d.price_str }}</span>
+            {% elif d.age_group %}<span class="med-price">{{ d.age_group }}</span>{% endif %}
           </div>
         </div>
       </a>

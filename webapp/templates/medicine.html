@@ -30,8 +30,23 @@
             {% endif %}
           </div>
           <div class="detail-img-footer">
+            {% if medicine.rating_stars %}
+            <div class="rating-row">
+              <span class="rating-stars">{{ medicine.rating_stars }}</span>
+              <span class="rating-num">{{ medicine.rating }}</span>
+            </div>
+            {% endif %}
             {% if medicine.price %}
-            <div class="price-big">{{ "{:,.0f}".format(medicine.price) | replace(",", " ") }} so'm</div>
+            <div class="price-row">
+              <div class="price-big">{{ "{:,.0f}".format(medicine.price) | replace(",", " ") }} so'm</div>
+              {% if medicine.discount and medicine.old_price_str %}
+              <span class="price-old">{{ medicine.old_price_str }}</span>
+              <span class="discount-badge">-{{ medicine.discount }}%</span>
+              {% endif %}
+            </div>
+            {% endif %}
+            {% if medicine.price_range_str %}
+            <div class="price-range">Dorixonalarda: {{ medicine.price_range_str }}</div>
             {% endif %}
             {% if medicine.prescription is not none %}
             <div class="rx-badge {% if medicine.prescription %}rx-yes{% else %}rx-no{% endif %}">
@@ -67,6 +82,12 @@
           {% if medicine.barcode %}
           <div class="side-row"><span class="side-label">Shtrix-kod</span><span class="side-val mono">{{ medicine.barcode }}</span></div>
           {% endif %}
+          {% if medicine.quantity_per_pack %}
+          <div class="side-row"><span class="side-label">Qadoqda</span><span class="side-val">{{ medicine.quantity_per_pack }} dona</span></div>
+          {% endif %}
+          {% if medicine.brand and medicine.brand != medicine.name %}
+          <div class="side-row"><span class="side-label">Brend</span><span class="side-val">{{ medicine.brand }}</span></div>
+          {% endif %}
         </div>
       </div>
 
@@ -100,7 +121,7 @@
               <span class="acc-icon">📋</span><span class="acc-title">Ko'rsatmalar</span>
               <svg class="acc-arr" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
-            <div class="acc-body" id="b-description">{{ medicine.description }}</div>
+            <div class="acc-body acc-body-rich" id="b-description">{{ medicine.description | safe }}</div>
           </div>
           {% endif %}
 
@@ -199,6 +220,9 @@
         </div>
         <div class="analogue-info">
           <div class="analogue-name">{{ a.name }}</div>
+          {% if a.rating_stars %}
+          <div class="med-rating"><span class="rating-stars">{{ a.rating_stars }}</span><span class="rating-num">{{ a.rating }}</span></div>
+          {% endif %}
           {% if a.manufacturer %}
           <div class="analogue-mfr">{{ a.manufacturer }}</div>
           {% endif %}

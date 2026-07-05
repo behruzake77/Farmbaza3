@@ -96,6 +96,9 @@
         <div class="med-card-body">
           {% if d.category %}<span class="badge">{{ d.category }}</span>{% endif %}
           <div class="med-name">{{ d.name }}</div>
+          {% if d.rating_stars %}
+          <div class="med-rating"><span class="rating-stars">{{ d.rating_stars }}</span><span class="rating-num">{{ d.rating }}</span></div>
+          {% endif %}
           <div class="med-footer">
             <span class="med-mfr">{{ d.manufacturer or "" }}</span>
             {% if d.price_str %}<span class="med-price">{{ d.price_str }}</span>{% endif %}

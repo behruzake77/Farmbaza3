@@ -39,6 +39,14 @@ def _gp_to_medicine_ctx(drug, local=None):
     m.prescription  = drug.prescription
     m.source_url    = drug.gopharm_url
     m.t136_filial   = bool(local.t136_filial) if local else False
+    m.brand             = getattr(drug, "brand", None)
+    m.rating            = getattr(drug, "rating", None)
+    m.rating_stars      = getattr(drug, "rating_stars", "")
+    m.quantity_per_pack = getattr(drug, "quantity_per_pack", None)
+    m.price_range_str   = getattr(drug, "price_range_str", "")
+    m.old_price_str     = getattr(drug, "old_price_str", "")
+    m.discount          = getattr(drug, "discount", 0)
+    m.pharm_group       = getattr(drug, "pharm_group", None)
     return m
 
 
