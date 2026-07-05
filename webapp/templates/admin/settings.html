@@ -1,0 +1,103 @@
+{% extends "admin/base.html" %}
+{% block title %}Sozlamalar — {{ site_name }}{% endblock %}
+{% block page_title %}Sozlamalar{% endblock %}
+{% block content %}
+
+{% if error %}
+<div class="error-msg" style="margin-bottom:16px;">⚠ {{ error }}</div>
+{% endif %}
+{% if success %}
+<div class="success-msg" style="margin-bottom:16px;">✓ {{ success }}</div>
+{% endif %}
+
+<!-- Umumiy sozlamalar -->
+<div class="admin-card">
+  <h3>Umumiy sozlamalar</h3>
+  <form method="post" action="/admin/sozlamalar/umumiy">
+    <div class="form-grid">
+      <div class="form-row">
+        <label>Sayt nomi</label>
+        <input type="text" name="site_name" value="{{ settings.site_name }}" required>
+      </div>
+      <div class="form-row">
+        <label>Vaqt zonasi</label>
+        <input type="text" name="timezone" value="{{ settings.timezone }}" placeholder="Asia/Tashkent" required>
+      </div>
+      <div class="form-row">
+        <label>Rate limit — so'rovlar soni</label>
+        <input type="number" name="rate_limit_requests" value="{{ settings.rate_limit_requests }}" min="1" required>
+        <small>Bir foydalanuvchi vaqt oralig'ida yubora oladigan maksimal so'rovlar soni</small>
+      </div>
+      <div class="form-row">
+        <label>Rate limit — daqiqa</label>
+        <input type="number" name="rate_limit_minutes" value="{{ settings.rate_limit_minutes }}" min="1" required>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-sm" type="submit">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      Saqlash
+    </button>
+  </form>
+</div>
+
+<!-- Admin login/parol -->
+<div class="admin-card">
+  <h3>Admin login va parol</h3>
+  <form method="post" action="/admin/sozlamalar/admin">
+    <div class="form-grid">
+      <div class="form-row">
+        <label>Admin login</label>
+        <input type="text" name="admin_username" value="{{ settings.admin_username }}" required>
+      </div>
+      <div class="form-row"></div>
+      <div class="form-row">
+        <label>Joriy parol</label>
+        <input type="password" name="current_password" placeholder="Parolni o'zgartirish uchun kiriting" autocomplete="current-password">
+      </div>
+      <div class="form-row"></div>
+      <div class="form-row">
+        <label>Yangi parol</label>
+        <input type="password" name="new_password" placeholder="Ixtiyoriy" autocomplete="new-password">
+      </div>
+      <div class="form-row">
+        <label>Yangi parolni tasdiqlash</label>
+        <input type="password" name="new_password_confirm" placeholder="Ixtiyoriy" autocomplete="new-password">
+      </div>
+    </div>
+    <small style="color:var(--text-muted);font-size:12px;margin-bottom:14px;display:block;">
+      Faqat login o'zgartirmoqchi bo'lsangiz, parol maydonlarini bo'sh qoldiring.
+    </small>
+    <button class="btn btn-primary btn-sm" type="submit">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      Saqlash
+    </button>
+  </form>
+</div>
+
+<!-- Sayt foni -->
+<div class="admin-card">
+  <h3>Sayt foni</h3>
+  {% if settings.site_background_url %}
+  <div style="margin-bottom:14px;">
+    <img src="{{ settings.site_background_url }}" alt="Joriy fon rasmi"
+         style="max-width:280px;max-height:160px;border-radius:12px;object-fit:cover;border:1px solid var(--line);display:block;">
+  </div>
+  {% endif %}
+  <form method="post" action="/admin/sozlamalar/fon" enctype="multipart/form-data" style="margin-bottom:10px;">
+    <div class="form-row">
+      <label>Fon rasmi (JPG, PNG, WEBP, GIF)</label>
+      <input type="file" name="background_file" accept=".jpg,.jpeg,.png,.webp,.gif" required>
+      <small>Tanlagan rasmingiz sayt sahifalarining fon dizayni sifatida qo'llanadi.</small>
+    </div>
+    <button class="btn btn-primary btn-sm" type="submit">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+      Fon rasmini yuklash
+    </button>
+  </form>
+  {% if settings.site_background_url %}
+  <form method="post" action="/admin/sozlamalar/fon/ochirish">
+    <button class="btn btn-outline btn-sm" type="submit">Fon rasmini olib tashlash</button>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

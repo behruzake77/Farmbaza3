@@ -1,0 +1,37 @@
+# Render.com deploy konfiguratsiyasi
+# Docs: https://render.com/docs/render-yaml-reference
+
+services:
+  - type: web
+    name: pharmbaseuz
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn webapp.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /
+    envVars:
+      - key: USE_SQLITE
+        value: "False"                    # Render da ALBATTA PostgreSQL ishlatiladi
+      - key: DATABASE_URL
+        fromDatabase:                     # Render avtomatik to'ldiradi
+          name: pharmbaseuz-db
+          property: connectionString
+      - key: SITE_NAME
+        value: PharmBaseUZ
+      - key: SITE_SECRET_KEY
+        generateValue: true               # Render o'zi random kalit yaratadi
+      - key: ADMIN_USERNAME
+        value: admin
+      - key: ADMIN_PASSWORD
+        sync: false                       # Dashboard dan qo'lda kiritiladi
+      - key: DEBUG
+        value: "False"
+      - key: RATE_LIMIT_REQUESTS
+        value: "30"
+      - key: RATE_LIMIT_MINUTES
+        value: "1"
+
+databases:
+  - name: pharmbaseuz-db
+    databaseName: pharmbaseuz
+    user: pharmuser
+    plan: free                           # Render free PostgreSQL (90 kun)

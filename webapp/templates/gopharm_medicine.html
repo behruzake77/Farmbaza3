@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}{{ drug.name }} — {{ site_name }}{% endblock %}
+
+{% block content %}
+<section class="detail-page">
+  <div class="wrap">
+    <nav class="breadcrumb">
+      <a href="/">Bosh sahifa</a>
+      <span class="sep">›</span>
+      <a href="javascript:history.back()">← Orqaga</a>
+    </nav>
+
+    <div class="detail-grid">
+      <div>
+        <div class="detail-img-card">
+          <div class="detail-img-inner">
+            {% if drug.image_url %}
+            <img class="detail-img" src="{{ drug.image_url }}" alt="{{ drug.name }}" data-lightbox
+                 onerror="this.outerHTML='<div class=&quot;detail-img-fallback&quot;>{{ drug.placeholder }}</div>'">
+            {% else %}
+            <div class="detail-img-fallback">{{ drug.placeholder }}</div>
+            {% endif %}
+          </div>
+          <div class="detail-img-footer">
+            {% if drug.price_str %}
+            <div class="price-badge">{{ drug.price_str }}</div>
+            {% endif %}
+            {% if drug.url %}
+            <a class="btn btn-outline gopharm-link" href="{{ drug.url }}" target="_blank" rel="noopener">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              GoPharm'da ko'rish
+            </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="badge-row">
+          {% if drug.category %}<span class="badge">{{ drug.category }}</span>{% endif %}
+          {% if is_t136 %}<span class="badge badge-t136">T136</span>{% endif %}
+        </div>
+        <h1 class="detail-title">{{ drug.name }}</h1>
+
+        <div class="detail-info-grid">
+          {% if drug.manufacturer %}
+          <div class="detail-row"><span class="label">Ishlab chiqaruvchi</span><span>{{ drug.manufacturer }}</span></div>
+          {% endif %}
+          {% if drug.country %}
+          <div class="detail-row"><span class="label">Ishlab chiqarilgan davlat</span><span>{{ drug.country }}</span></div>
+          {% endif %}
+          {% if drug.dosage_form %}
+          <div class="detail-row"><span class="label">Shakli</span><span>{{ drug.dosage_form }}</span></div>
+          {% endif %}
+          {% if drug.strength %}
+          <div class="detail-row"><span class="label">Dozasi</span><span>{{ drug.strength }}</span></div>
+          {% endif %}
+          {% if drug.barcode %}
+          <div class="detail-row"><span class="label">Shtrix-kod</span><span>{{ drug.barcode }}</span></div>
+          {% endif %}
+          {% if drug.prescription is not none %}
+          <div class="detail-row">
+            <span class="label">Retsept holati</span>
+            <span class="{% if drug.prescription %}badge-danger{% else %}badge-safe{% endif %}">
+              {{ "Retsept talab etiladi" if drug.prescription else "Retseptsiz sotiladi" }}
+            </span>
+          </div>
+          {% endif %}
+        </div>
+
+        {% if drug.composition %}
+        <div class="detail-section">
+          <h3>Tarkibi</h3>
+          <p>{{ drug.composition }}</p>
+        </div>
+        {% endif %}
+
+        {% if drug.description %}
+        <div class="detail-section">
+          <h3>Tavsif</h3>
+          <p class="description-text">{{ drug.description }}</p>
+        </div>
+        {% endif %}
+
+        {% if drug.age_group %}
+        <div class="detail-section">
+          <h3>Necha yoshga beriladi</h3>
+          <p>{{ drug.age_group }}</p>
+        </div>
+        {% endif %}
+
+        {% if categories %}
+        <div class="detail-section save-to-cat">
+          <h3>Mahalliy bazaga saqlash</h3>
+          <form action="/admin/dorilar/saqlash-gp" method="post" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <input type="hidden" name="gp_id" value="{{ drug.id }}">
+            <select name="category_id" class="inline-select">
+              <option value="">Kategoriyasiz</option>
+              {% for c in categories %}
+              <option value="{{ c.id }}" {% if saved_category_id and c.id == saved_category_id %}selected{% endif %}>{{ c.nomi }}</option>
+              {% endfor %}
+            </select>
+            <label style="display:flex;align-items:center;gap:6px;font-size:14px;">
+              <input type="checkbox" name="t136_filial" value="1" {% if is_t136 %}checked{% endif %}>
+              T136 filialida mavjud
+            </label>
+            <button type="submit" class="btn btn-primary btn-sm">Saqlash</button>
+          </form>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

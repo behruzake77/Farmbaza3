@@ -1,0 +1,109 @@
+{% extends "admin/base.html" %}
+{% block title %}{% if medicine %}Tahrirlash{% else %}Yangi dori{% endif %} — {{ site_name }}{% endblock %}
+{% block page_title %}{% if medicine %}Tahrirlash{% else %}Yangi dori qo'shish{% endif %}{% endblock %}
+{% block topbar_actions %}
+  <a class="btn btn-outline btn-sm" href="/admin/dorilar">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    Ro'yxatga qaytish
+  </a>
+{% endblock %}
+{% block content %}
+
+<form class="admin-card" method="post" enctype="multipart/form-data"
+      action="{% if medicine %}/admin/dorilar/{{ medicine.id }}/tahrirlash{% else %}/admin/dorilar/yangi{% endif %}">
+
+  <div class="form-row">
+    <label>Nomi *</label>
+    <input type="text" name="name" value="{{ medicine.name if medicine else '' }}" required>
+  </div>
+
+  <div class="form-grid">
+    <div class="form-row">
+      <label>Kategoriya</label>
+      <input type="text" name="category" list="category-list" autocomplete="off"
+             value="{{ medicine.category if medicine else '' }}"
+             placeholder="Kategoriya nomini yozing yoki tanlang...">
+      <datalist id="category-list">
+        {% for cat in categories %}<option value="{{ cat.nomi }}"></option>{% endfor %}
+      </datalist>
+      <small>Ro'yxatdan tanlang yoki yangi nom yozing — mavjud bo'lmasa avtomatik yaratiladi.</small>
+    </div>
+
+    <div class="form-row">
+      <label>Ishlab chiqaruvchi</label>
+      <input type="text" name="manufacturer" value="{{ medicine.manufacturer if medicine else '' }}">
+    </div>
+
+    <div class="form-row">
+      <label>Shakli (tabletka, kapsula…)</label>
+      <input type="text" name="dosage_form" value="{{ medicine.dosage_form if medicine else '' }}">
+    </div>
+
+    <div class="form-row">
+      <label>Dozasi</label>
+      <input type="text" name="strength" value="{{ medicine.strength if medicine else '' }}">
+    </div>
+
+    <div class="form-row">
+      <label>Narxi (so'm)</label>
+      <input type="number" step="0.01" name="price"
+             value="{{ medicine.price if medicine and medicine.price else '' }}">
+    </div>
+
+    <div class="form-row">
+      <label>Shtrix-kod</label>
+      <input type="text" name="barcode" value="{{ medicine.barcode if medicine else '' }}">
+    </div>
+
+    <div class="form-row">
+      <label>Necha yoshga beriladi</label>
+      <input type="text" name="age_group" value="{{ medicine.age_group if medicine else '' }}"
+             placeholder="masalan: 3 yoshdan boshlab">
+    </div>
+  </div>
+
+  <div class="form-row">
+    <label>Dori rasmi</label>
+    {% if medicine and medicine.image_url %}
+    <div style="margin-bottom:8px;">
+      <img src="{{ medicine.image_url }}" alt="{{ medicine.name }}"
+           style="max-width:120px;max-height:120px;border-radius:8px;object-fit:cover;">
+    </div>
+    {% endif %}
+    <input type="file" name="image_file" accept="image/png,image/jpeg,image/webp,image/gif">
+    <small>Kompyuteringizdan rasm tanlang (JPG, PNG, WEBP, GIF).</small>
+  </div>
+
+  <div class="form-row">
+    <label>yoki rasm URL manzili</label>
+    <input type="url" name="image_url"
+           value="{{ medicine.image_url if medicine else '' }}" placeholder="https://…">
+  </div>
+
+  <div class="form-row">
+    <label>Tarkibi</label>
+    <textarea name="composition" rows="3">{{ medicine.composition if medicine else '' }}</textarea>
+  </div>
+
+  <div class="form-row">
+    <label>Tavsif</label>
+    <textarea name="description" rows="4">{{ medicine.description if medicine else '' }}</textarea>
+  </div>
+
+  <div class="form-row">
+    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+      <input type="checkbox" name="t136_filial" value="1"
+             {% if medicine and medicine.t136_filial %}checked{% endif %}>
+      T136 filialida mavjud
+    </label>
+  </div>
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;">
+    <button class="btn btn-primary" type="submit">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      {% if medicine %}Saqlash{% else %}Qo'shish{% endif %}
+    </button>
+    <a class="btn btn-outline" href="/admin/dorilar">Bekor qilish</a>
+  </div>
+</form>
+{% endblock %}

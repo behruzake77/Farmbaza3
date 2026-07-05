@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+{% block title %}{{ medicine.name }} — {{ site_name }}{% endblock %}
+
+{% block content %}
+<section class="detail-page">
+  <div class="wrap">
+
+    <nav class="breadcrumb">
+      <a href="/">Bosh sahifa</a>
+      <span class="sep">›</span>
+      {% if medicine.category %}
+      <a href="/qidiruv?q={{ medicine.category }}">{{ medicine.category }}</a>
+      <span class="sep">›</span>
+      {% endif %}
+      <span>{{ medicine.name }}</span>
+    </nav>
+
+    <div class="detail-grid">
+
+      <!-- CHAP: rasm + narx -->
+      <div class="detail-left">
+        <div class="detail-img-card">
+          <div class="detail-img-inner">
+            {% if medicine.image_url %}
+            <img class="detail-img" src="{{ medicine.image_url }}" alt="{{ medicine.name }}"
+                 data-lightbox
+                 onerror="this.outerHTML='<div class=\'detail-img-fallback\'>{{ placeholder }}</div>'">
+            {% else %}
+            <div class="detail-img-fallback">{{ placeholder }}</div>
+            {% endif %}
+          </div>
+          <div class="detail-img-footer">
+            {% if medicine.price %}
+            <div class="price-big">{{ "{:,.0f}".format(medicine.price) | replace(",", " ") }} so'm</div>
+            {% endif %}
+            {% if medicine.prescription is not none %}
+            <div class="rx-badge {% if medicine.prescription %}rx-yes{% else %}rx-no{% endif %}">
+              {% if medicine.prescription %}⛔ Retsept kerak{% else %}✅ Retseptsiz sotiladi{% endif %}
+            </div>
+            {% endif %}
+            {% if medicine.source_url %}
+            <a class="gopharm-link" href="{{ medicine.source_url }}" target="_blank" rel="noopener">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              Gopharm saytida ko'rish
+            </a>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Qisqa jadval -->
+        <div class="side-info-card">
+          {% if medicine.manufacturer %}
+          <div class="side-row"><span class="side-label">Ishlab chiqaruvchi</span><span class="side-val">{{ medicine.manufacturer }}</span></div>
+          {% endif %}
+          {% if medicine.country %}
+          <div class="side-row"><span class="side-label">Davlat</span><span class="side-val">{{ medicine.country }}</span></div>
+          {% endif %}
+          {% if medicine.dosage_form %}
+          <div class="side-row"><span class="side-label">Shakli</span><span class="side-val">{{ medicine.dosage_form }}</span></div>
+          {% endif %}
+          {% if medicine.strength %}
+          <div class="side-row"><span class="side-label">Dozasi</span><span class="side-val">{{ medicine.strength }}</span></div>
+          {% endif %}
+          {% if medicine.age_group %}
+          <div class="side-row"><span class="side-label">Yosh guruhi</span><span class="side-val">{{ medicine.age_group }}</span></div>
+          {% endif %}
+          {% if medicine.barcode %}
+          <div class="side-row"><span class="side-label">Shtrix-kod</span><span class="side-val mono">{{ medicine.barcode }}</span></div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- O'NG: ma'lumotlar -->
+      <div class="detail-right">
+
+        <div class="detail-header">
+          <div class="badge-row">
+            {% if medicine.category %}<span class="badge">{{ medicine.category }}</span>{% endif %}
+            {% if medicine.t136_filial %}<span class="badge badge-t136">T136</span>{% endif %}
+          </div>
+          <h1 class="detail-title">{{ medicine.name }}</h1>
+        </div>
+
+        <!-- ACCORDION -->
+        <div class="accordion">
+
+          {% if medicine.composition %}
+          <div class="acc-item" id="ai-composition">
+            <button class="acc-head" onclick="tog('composition')">
+              <span class="acc-icon">💊</span><span class="acc-title">Tarkibi</span>
+              <svg class="acc-arr" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="acc-body" id="b-composition">{{ medicine.composition }}</div>
+          </div>
+          {% endif %}
+
+          {% if medicine.description %}
+          <div class="acc-item open" id="ai-description">
+            <button class="acc-head" onclick="tog('description')">
+              <span class="acc-icon">📋</span><span class="acc-title">Ko'rsatmalar</span>
+              <svg class="acc-arr" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="acc-body" id="b-description">{{ medicine.description }}</div>
+          </div>
+          {% endif %}
+
+          {% if medicine.frequency %}
+          <div class="acc-item" id="ai-frequency">
+            <button class="acc-head" onclick="tog('frequency')">
+              <span class="acc-icon">⏱️</span><span class="acc-title">Qabul tartibi</span>
+              <svg class="acc-arr" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="acc-body" id="b-frequency">{{ medicine.frequency }}</div>
+          </div>
+          {% endif %}
+
+          {% if not medicine.description and not medicine.composition %}
+          <div class="acc-item open" id="ai-empty">
+            <button class="acc-head" onclick="tog('empty')">
+              <span class="acc-icon">📋</span><span class="acc-title">Ma'lumotlar</span>
+              <svg class="acc-arr" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="acc-body" id="b-empty">
+              <div class="no-info-box">
+                <p>Bu dori haqida batafsil ma'lumot hozircha mavjud emas.</p>
+                {% if medicine.source_url %}
+                <a href="{{ medicine.source_url }}" target="_blank">Gopharm saytida ko'rish →</a>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endif %}
+
+          <div class="acc-item" id="ai-warning">
+            <button class="acc-head" onclick="tog('warning')">
+              <span class="acc-icon">⚠️</span><span class="acc-title">Ehtiyot choralar</span>
+              <svg class="acc-arr" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="acc-body" id="b-warning">
+              <div class="warning-box">
+                <p>⚠️ Dorilarni qabul qilishdan oldin shifokor yoki farmatsevt bilan maslahatlashing.</p>
+                <p>Bolalarga berishdan avval pediatr bilan maslahatlashing.</p>
+                <p>Dori nomlarini va ko'rsatmalarni o'zboshimchalik bilan almashtirmang.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Admin: gopharm dorini saqlash -->
+        {% if categories is defined and categories %}
+        <div class="acc-item" style="margin-top:14px;" id="ai-save">
+          <button class="acc-head" onclick="tog('save')">
+            <span class="acc-icon">💾</span><span class="acc-title">Mahalliy bazaga saqlash</span>
+            <svg class="acc-arr" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="acc-body" id="b-save">
+            <form action="/admin/dorilar/saqlash-gp" method="post" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+              <input type="hidden" name="gp_id" value="{{ medicine.id }}">
+              <select name="category_id" class="inline-select">
+                <option value="">Kategoriyasiz</option>
+                {% for c in categories %}
+                <option value="{{ c.id }}" {% if saved_category_id and c.id == saved_category_id %}selected{% endif %}>{{ c.nomi }}</option>
+                {% endfor %}
+              </select>
+              <label style="display:flex;align-items:center;gap:6px;font-size:13px;">
+                <input type="checkbox" name="t136_filial" value="1" {% if is_t136 %}checked{% endif %}>
+                T136 filialida mavjud
+              </label>
+              <button type="submit" class="btn btn-primary btn-sm">Saqlash</button>
+            </form>
+          </div>
+        </div>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+</section>
+
+{% if analogues %}
+<section class="analogues-section">
+  <div class="wrap">
+    <h2 class="analogues-title">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="12" r="7"/><circle cx="15" cy="12" r="7"/></svg>
+      Analoglar
+      <span class="analogues-count">{{ analogues|length }} ta</span>
+    </h2>
+    <div class="analogues-grid">
+      {% for a in analogues %}
+      <a class="analogue-card" href="{{ analogue_prefix | default('/gp/') }}{{ a.id }}">
+        <div class="analogue-img">
+          {% if a.image_url %}
+          <img src="{{ a.image_url }}" alt="{{ a.name }}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="analogue-ph" style="display:none">{{ (a.name or '?')[0].upper() }}</div>
+          {% else %}
+          <div class="analogue-ph">{{ (a.name or '?')[0].upper() }}</div>
+          {% endif %}
+        </div>
+        <div class="analogue-info">
+          <div class="analogue-name">{{ a.name }}</div>
+          {% if a.manufacturer %}
+          <div class="analogue-mfr">{{ a.manufacturer }}</div>
+          {% endif %}
+          {% if a.price %}
+          <div class="analogue-price">{{ "{:,.0f}".format(a.price) | replace(",", " ") }} so'm</div>
+          {% endif %}
+          {% if a.dosage_form %}
+          <div class="analogue-form">{{ a.dosage_form }}</div>
+          {% endif %}
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<script>
+function tog(key) {
+  const el = document.getElementById('ai-' + key);
+  if (el) el.classList.toggle('open');
+}
+</script>
+{% endblock %}

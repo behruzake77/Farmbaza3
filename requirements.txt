@@ -1,0 +1,51 @@
+# Web framework
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+jinja2==3.1.4
+python-multipart==0.0.17
+itsdangerous==2.2.0
+aiofiles==24.1.0
+
+# Database ORM
+sqlalchemy[asyncio]==2.0.36
+aiosqlite==0.22.1       # SQLite (lokal ishlab chiqish)
+asyncpg==0.30.0         # PostgreSQL async driver (Render, production)
+
+# Configuration
+pydantic>=2.4.1,<2.10
+pydantic-settings==2.6.1
+python-dotenv==1.0.1
+
+# Security
+passlib[bcrypt]==1.7.4
+bcrypt==4.0.1
+
+# Search / fuzzy matching
+rapidfuzz==3.10.1
+
+# Logging
+loguru==0.7.3
+
+# Excel (admin panel)
+openpyxl==3.1.5
+
+# AI (ixtiyoriy)
+openai
+aiofiles==24.1.0
+aiosqlite==0.22.1
+asyncpg==0.30.0
+bcrypt==4.0.1
+fastapi==0.115.5
+itsdangerous==2.2.0
+jinja2==3.1.4
+loguru==0.7.3
+openai
+openpyxl==3.1.5
+passlib[bcrypt]==1.7.4
+pydantic>=2.4.1,<2.10
+pydantic-settings==2.6.1
+python-dotenv==1.0.1
+python-multipart==0.0.17
+rapidfuzz==3.10.1
+sqlalchemy[asyncio]==2.0.36
+uvicorn[standard]==0.32.1

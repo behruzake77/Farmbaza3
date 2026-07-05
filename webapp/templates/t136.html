@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}T136 Filiali — {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="t136-header">
+  <div class="wrap">
+    <div class="t136-badge-big">🏥 Filial</div>
+    <h1>T136 Filiali</h1>
+    <p>Bu filialdagi dorilar ro'yxati — {{ medicines|length }} ta mahsulot</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="wrap">
+    {% if medicines %}
+    <div class="med-grid">
+      {% for m in medicines %}
+      <a class="med-card" href="{{ m.source_url or '/dori/' + m.id|string }}">
+        <div class="med-card-img">
+          {% if m.image_url %}
+          <img class="med-thumb" src="{{ m.image_url }}" alt="{{ m.name }}" loading="lazy"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="med-thumb-fallback" style="display:none">{{ (m.name[:1] or '?')|upper }}</div>
+          {% else %}
+          <div class="med-thumb-fallback">{{ (m.name[0] or "?")|upper }}</div>
+          {% endif %}
+        </div>
+        <div class="med-card-body">
+          <div class="badge-row">
+            {% if m.category %}<span class="badge">{{ m.category }}</span>{% endif %}
+            <span class="badge badge-t136">T136</span>
+          </div>
+          <div class="med-name">{{ m.name }}</div>
+          <div class="med-footer">
+            <span class="med-mfr">{{ m.manufacturer or "" }}</span>
+            {% if m.price %}<span class="med-price">{{ "%.0f"|format(m.price) }} so'm</span>{% endif %}
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div>📦</div>
+      <p>T136 filialida hali dori belgilanmagan.</p>
+      <p>Admin paneldan dori sahifasida "T136 filialida mavjud" belgisini qo'ying.</p>
+      <a class="btn btn-primary" href="/admin/dorilar" style="margin-top:20px;">Admin panel</a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}{{ category.nomi }} — {{ site_name }}{% endblock %}
+
+{% block content %}
+<section class="section" style="padding-top:32px;">
+  <div class="wrap">
+    <nav class="breadcrumb">
+      <a href="/">Bosh sahifa</a>
+      <span class="sep">›</span>
+      <a href="/#kategoriyalar">Kategoriyalar</a>
+      <span class="sep">›</span>
+      <span>{{ category.nomi }}</span>
+    </nav>
+
+    <div class="section-head" style="margin-top:20px;">
+      <h2>{{ category.nomi }}</h2>
+      <span class="count">{{ medicines|length }} ta dori</span>
+    </div>
+
+    {% if medicines %}
+    <div class="med-grid">
+      {% for m in medicines %}
+      <a class="med-card" href="/dori/{{ m.id }}">
+        <div class="med-card-img">
+          {% if m.image_url %}
+          <img class="med-thumb" src="{{ m.image_url }}" alt="{{ m.name }}" loading="lazy"
+               onerror="this.outerHTML='<div class=&quot;med-thumb-fallback&quot;>{{ (m.name[:1] or \"?\")|upper }}</div>'">
+          {% else %}
+          <div class="med-thumb-fallback">{{ m.name[0]|upper if m.name else "?" }}</div>
+          {% endif %}
+        </div>
+        <div class="med-card-body">
+          {% if m.t136_filial %}
+          <div class="badge-row"><span class="badge badge-t136">T136</span></div>
+          {% endif %}
+          <div class="med-name">{{ m.name }}</div>
+          <div class="med-footer">
+            <span class="med-mfr">{{ m.manufacturer or "" }}</span>
+            {% if m.price %}<span class="med-price">{{ "%.0f"|format(m.price) }} so'm</span>{% endif %}
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div>📦</div>
+      <p>Bu kategoriyada hali dori yo'q.</p>
+      <a class="btn btn-outline" href="/admin/dorilar" style="margin-top:20px;">Admin panel</a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

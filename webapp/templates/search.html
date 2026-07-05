@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}"{{ query }}" bo'yicha qidiruv — {{ site_name }}{% endblock %}
+{% block search_value %}{{ query }}{% endblock %}
+
+{% block content %}
+<section class="section" style="padding-top:32px;">
+  <div class="wrap">
+    <div class="section-head">
+      {% if query %}
+      <h2>"{{ query }}" bo'yicha natijalar</h2>
+      <span class="count">{{ results|length }} ta topildi</span>
+      {% else %}
+      <h2>Barcha dorilar</h2>
+      {% endif %}
+    </div>
+
+    {% if results %}
+    <div class="med-grid">
+      {% for d in results %}
+      <a class="med-card" href="{{ d.detail_url }}">
+        <div class="med-card-img">
+          {% if d.image_url %}
+          <img class="med-thumb" src="{{ d.image_url }}" alt="{{ d.name }}" loading="lazy"
+               onerror="this.outerHTML='<div class=&quot;med-thumb-fallback&quot;>{{ d.placeholder }}</div>'">
+          {% else %}
+          <div class="med-thumb-fallback">{{ d.placeholder }}</div>
+          {% endif %}
+        </div>
+        <div class="med-card-body">
+          <div class="badge-row">
+            {% if d.category %}<span class="badge">{{ d.category }}</span>{% endif %}
+            {% if d.t136_filial %}<span class="badge badge-t136">T136</span>{% endif %}
+          </div>
+          <div class="med-name">{{ d.name }}</div>
+          <div class="med-footer">
+            <span class="med-mfr">{{ d.manufacturer or "" }}</span>
+            {% if d.age_group %}<span class="med-price">{{ d.age_group }}</span>{% endif %}
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% elif query %}
+    <div class="empty-state">
+      <div>🔍</div>
+      <p>"<strong>{{ query }}</strong>" bo'yicha hech narsa topilmadi.</p>
+      <p>Boshqa nom yoki imlo bilan qayta urinib ko'ring.</p>
+      <a href="/" class="btn btn-primary" style="margin-top:20px;">Bosh sahifaga qaytish</a>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div>💊</div>
+      <p>Qidiruv uchun dori nomini kiriting.</p>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

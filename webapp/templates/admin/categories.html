@@ -1,0 +1,135 @@
+{% extends "admin/base.html" %}
+{% block title %}Kategoriyalar — {{ site_name }}{% endblock %}
+{% block page_title %}Kategoriyalar <span style="font-size:14px;font-weight:500;color:var(--text-muted);margin-left:6px;">{{ categories|length }} ta</span>{% endblock %}
+{% block content %}
+
+{% if error %}
+<div class="error-msg" style="margin-bottom:16px;">⚠ {{ error }}</div>
+{% endif %}
+{% if success %}
+<div class="success-msg" style="margin-bottom:16px;">✓ {{ success }}</div>
+{% endif %}
+
+<!-- Yangi kategoriya -->
+<div class="admin-card">
+  <h3>Yangi kategoriya qo'shish</h3>
+  <form method="post" action="/admin/kategoriyalar/qoshish">
+    <div class="form-grid">
+      <div class="form-row">
+        <label>Kategoriya nomi *</label>
+        <input type="text" name="nomi" placeholder="Masalan: Antibiotiklar" required>
+      </div>
+      <div class="form-row">
+        <label>GoPharm slug (ixtiyoriy)</label>
+        <input type="text" name="gopharm_slug" placeholder="Masalan: antibiotiki">
+        <small>GoPharm saytidagi kategoriya URL nomi</small>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-sm" type="submit">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Qo'shish
+    </button>
+  </form>
+</div>
+
+<!-- Kategoriyalar ro'yxati -->
+<div class="admin-card" style="padding:0;overflow:hidden;">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th style="width:40px;">#</th>
+        <th>Nomi</th>
+        <th>GoPharm slug</th>
+        <th>Dorilar soni</th>
+        <th style="text-align:right;">Amallar</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for cat in categories %}
+      <tr>
+        <td style="color:var(--text-light);font-size:13px;">{{ loop.index }}</td>
+        <td><strong>{{ cat.nomi }}</strong></td>
+        <td>
+          {% if cat.gopharm_slug %}
+          <code style="background:#f0f7f5;padding:2px 8px;border-radius:4px;font-size:12px;">{{ cat.gopharm_slug }}</code>
+          {% else %}
+          <span style="color:var(--text-light);font-size:13px;">—</span>
+          {% endif %}
+        </td>
+        <td>
+          <span style="font-weight:700;color:var(--primary);">{{ counts.get(cat.nomi, 0) }}</span>
+          <span style="color:var(--text-muted);font-size:12px;margin-left:3px;">ta</span>
+        </td>
+        <td class="row-actions" style="justify-content:flex-end;">
+          <button class="btn btn-outline btn-sm js-edit-cat"
+                  data-id="{{ cat.id }}"
+                  data-nomi="{{ cat.nomi }}"
+                  data-slug="{{ cat.gopharm_slug or '' }}">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Tahrirlash
+          </button>
+          <a class="btn btn-outline btn-sm" href="/admin/dorilar?kategoriya={{ cat.nomi|urlencode }}">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            Ko'rish
+          </a>
+          <form method="post" action="/admin/kategoriyalar/{{ cat.id }}/ochirish"
+                onsubmit="return confirm('{{ cat.nomi }} kategoriyasini o\'chirishga ishonchingiz komilmi?');">
+            <button class="btn btn-danger btn-sm" type="submit">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              O'chirish
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="5" style="text-align:center;padding:40px;color:var(--text-muted);">
+          Hozircha kategoriya yo'q. Yuqorida yangi kategoriya qo'shing.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Tahrirlash modali -->
+<div id="edit-modal" class="modal-overlay">
+  <div class="modal-box">
+    <h3>Kategoriyani tahrirlash</h3>
+    <form id="edit-form" method="post">
+      <div class="form-row">
+        <label>Kategoriya nomi *</label>
+        <input type="text" name="nomi" id="edit-nomi" required>
+      </div>
+      <div class="form-row">
+        <label>GoPharm slug (ixtiyoriy)</label>
+        <input type="text" name="gopharm_slug" id="edit-slug" placeholder="antibiotiki">
+      </div>
+      <div style="display:flex;gap:10px;margin-top:8px;">
+        <button class="btn btn-primary btn-sm" type="submit">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Saqlash
+        </button>
+        <button class="btn btn-outline btn-sm" type="button" id="cancel-edit">Bekor qilish</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.js-edit-cat').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.getElementById('edit-nomi').value = btn.dataset.nomi;
+    document.getElementById('edit-slug').value = btn.dataset.slug;
+    document.getElementById('edit-form').action = '/admin/kategoriyalar/' + btn.dataset.id + '/tahrirlash';
+    document.getElementById('edit-modal').classList.add('open');
+  });
+});
+document.getElementById('cancel-edit').addEventListener('click', () => {
+  document.getElementById('edit-modal').classList.remove('open');
+});
+document.getElementById('edit-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+});
+</script>
+{% endblock %}

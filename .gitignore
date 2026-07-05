@@ -1,0 +1,36 @@
+# Muhit o'zgaruvchilari (HECH QACHON GitHub ga yuklanmasin)
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# SQLite bazasi (Render da kerak emas, lokal uchun)
+*.db
+*.sqlite3
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Replit
+.local/
+.agents/
+.upm/
+replit.nix
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Uploads (agar serverda saqlanayotgan bo'lsa)
+webapp/static/uploads/*
+!webapp/static/uploads/.gitkeep

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kirish — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="admin-login-wrap">
+  <div class="admin-login-card">
+    <div class="admin-login-brand">
+      <span class="brand-mark">Rx</span>
+      <span>{{ site_name }}</span>
+    </div>
+    <p style="text-align:center;color:var(--text-muted);font-size:14px;margin:0 0 24px;">Admin paneliga kirish</p>
+
+    {% if error %}
+    <div class="error-msg" style="margin-bottom:16px;">{{ error }}</div>
+    {% endif %}
+
+    <form method="post" action="/admin/login">
+      <div class="form-row">
+        <label>Foydalanuvchi nomi</label>
+        <input type="text" name="username" placeholder="admin" required autofocus>
+      </div>
+      <div class="form-row">
+        <label>Parol</label>
+        <input type="password" name="password" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" style="margin-top:8px;padding:13px;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        Kirish
+      </button>
+    </form>
+
+    <p style="text-align:center;margin-top:20px;">
+      <a href="/" style="color:var(--text-muted);font-size:13px;">← Saytga qaytish</a>
+    </p>
+  </div>
+</div>
+</body>
+</html>
