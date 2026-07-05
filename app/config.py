@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     site_secret_key: str = Field(default_factory=lambda: __import__("os").environ.get("SESSION_SECRET", "o'zgartiring-maxfiy-kalit-123"), env="SITE_SECRET_KEY")
     site_name: str = Field("PharmBaseUZ", env="SITE_NAME")
     site_background_url: str = Field("", env="SITE_BACKGROUND_URL")
+    site_animation_style: str = Field("pills", env="SITE_ANIMATION_STYLE")
 
     debug: bool = Field(False, env="DEBUG")
     log_level: str = Field("INFO", env="LOG_LEVEL")

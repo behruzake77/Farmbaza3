@@ -580,6 +580,26 @@ async def settings_update_admin(request: Request,
     })
 
 
+@router.post("/sozlamalar/animatsiya")
+async def settings_update_animation(request: Request,
+                                     site_animation_style: str = Form(...),
+                                     admin: str = Depends(get_current_admin)):
+    allowed = {"pills", "particles", "molecules", "waves", "none"}
+    style_clean = site_animation_style.strip().lower()
+    if style_clean not in allowed:
+        style_clean = "pills"
+    update_env_values({"SITE_ANIMATION_STYLE": style_clean})
+    settings.site_animation_style = style_clean
+    return templates.TemplateResponse("admin/settings.html", {
+        "request":   request,
+        "site_name": settings.site_name,
+        "admin":     admin,
+        "settings":  settings,
+        "success":   "3D animatsiya uslubi yangilandi.",
+        "error":     None,
+    })
+
+
 @router.post("/sozlamalar/fon")
 async def settings_update_background(request: Request,
                                       background_file: UploadFile = None,

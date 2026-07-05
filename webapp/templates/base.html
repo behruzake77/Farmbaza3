@@ -11,6 +11,9 @@
 </head>
 <body{% if settings.site_background_url %} style="--site-bg-image: url('{{ settings.site_background_url }}');" class="has-custom-bg"{% endif %}>
 
+<!-- 3D FON — butun sayt bo'ylab -->
+<canvas id="site-3d" aria-hidden="true" data-style="{{ settings.site_animation_style or 'pills' }}"></canvas>
+
 <!-- LOADER -->
 <div id="page-loader" class="page-loader">
   <div class="page-loader-inner">
@@ -150,5 +153,7 @@ function closeNav() {
 })();
 </script>
 <script src="/static/js/search.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="/static/js/site3d.js"></script>
 </body>
 </html>
