@@ -97,10 +97,10 @@
     <div class="doc-section" id="doc-section">
       <aside class="doc-nav" id="doc-nav">
         {% for s in doc_sections %}
-        <button class="doc-nav-item {% if loop.first %}active{% endif %}" data-doc="{{ s.id }}" onclick="showDoc('{{ s.id }}')">{{ s.title }}</button>
+        <button class="doc-nav-item {% if loop.first %}active{% endif %}" data-doc="{{ s.id }}" onclick="showDoc('{{ s.id }}', true)">{{ s.title }}</button>
         {% endfor %}
         {% if not doc_sections %}
-        <button class="doc-nav-item active" data-doc="empty" onclick="showDoc('empty')">Ma'lumot</button>
+        <button class="doc-nav-item active" data-doc="empty" onclick="showDoc('empty', true)">Ma'lumot</button>
         {% endif %}
       </aside>
 
@@ -204,24 +204,22 @@ function tog(key) {
   if (el) el.classList.toggle('open');
 }
 
-function showDoc(id) {
+function showDoc(id, scroll) {
   document.querySelectorAll('.doc-nav-item').forEach(function (btn) {
     btn.classList.toggle('active', btn.dataset.doc === id);
   });
   document.querySelectorAll('.doc-panel').forEach(function (panel) {
     panel.classList.toggle('active', panel.id === 'dp-' + id);
   });
-  const panel = document.getElementById('dp-' + id);
-  if (panel && window.innerWidth <= 860) {
-    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  } else {
-    document.getElementById('doc-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  if (scroll && window.innerWidth <= 860) {
+    const panel = document.getElementById('dp-' + id);
+    if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 }
 
 document.addEventListener('DOMContentLoaded', function () {
   var firstNav = document.querySelector('.doc-nav-item');
-  if (firstNav) showDoc(firstNav.dataset.doc);
+  if (firstNav) showDoc(firstNav.dataset.doc, false);
 });
 </script>
 {% endblock %}
