@@ -22,6 +22,7 @@ templates.env.globals["settings"] = settings
 
 UPLOAD_DIR = "webapp/static/uploads/dorilar"
 BG_UPLOAD_DIR = "webapp/static/uploads/fon"
+ANIM_UPLOAD_DIR = "webapp/static/uploads/animatsiya"
 ALLOWED_IMAGE_EXT = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
 
 
@@ -41,6 +42,24 @@ async def _save_uploaded_bg(file: UploadFile) -> str | None:
     with open(filepath, "wb") as f:
         f.write(content)
     return f"/static/uploads/fon/{filename}"
+
+
+async def _save_uploaded_anim(file: UploadFile) -> str | None:
+    """Yuklangan 3D animatsiya rasmini saqlaydi va static URL manzilini qaytaradi."""
+    if not file or not file.filename:
+        return None
+    ext = os.path.splitext(file.filename)[1].lower()
+    if ext not in ALLOWED_IMAGE_EXT:
+        return None
+    os.makedirs(ANIM_UPLOAD_DIR, exist_ok=True)
+    filename = f"{uuid.uuid4().hex}{ext}"
+    filepath = os.path.join(ANIM_UPLOAD_DIR, filename)
+    content = await file.read()
+    if not content:
+        return None
+    with open(filepath, "wb") as f:
+        f.write(content)
+    return f"/static/uploads/animatsiya/{filename}"
 
 
 async def _save_uploaded_image(file: UploadFile) -> str | None:
@@ -583,20 +602,38 @@ async def settings_update_admin(request: Request,
 @router.post("/sozlamalar/animatsiya")
 async def settings_update_animation(request: Request,
                                      site_animation_style: str = Form(...),
+                                     animation_image: UploadFile = None,
                                      admin: str = Depends(get_current_admin)):
-    allowed = {"pills", "particles", "molecules", "waves", "none"}
+    allowed = {"pills", "particles", "molecules", "waves", "custom", "none"}
     style_clean = site_animation_style.strip().lower()
     if style_clean not in allowed:
         style_clean = "pills"
-    update_env_values({"SITE_ANIMATION_STYLE": style_clean})
+
+    error = None
+    success = "3D animatsiya uslubi yangilandi."
+    env_updates = {"SITE_ANIMATION_STYLE": style_clean}
+
+    if style_clean == "custom":
+        uploaded_url = await _save_uploaded_anim(animation_image)
+        if uploaded_url:
+            env_updates["SITE_ANIMATION_IMAGE_URL"] = uploaded_url
+            settings.site_animation_image_url = uploaded_url
+            success = "Rasmingiz yuklandi va butun sayt bo'ylab harakatlanadigan 3D fon sifatida qo'yildi."
+        elif not settings.site_animation_image_url:
+            error = "\"Mening rasmim\" uslubini tanlash uchun avval rasm yuklang (JPG, PNG, WEBP yoki GIF)."
+            style_clean = settings.site_animation_style or "pills"
+            env_updates["SITE_ANIMATION_STYLE"] = style_clean
+
+    update_env_values(env_updates)
     settings.site_animation_style = style_clean
+
     return templates.TemplateResponse("admin/settings.html", {
         "request":   request,
         "site_name": settings.site_name,
         "admin":     admin,
         "settings":  settings,
-        "success":   "3D animatsiya uslubi yangilandi.",
-        "error":     None,
+        "success":   None if error else success,
+        "error":     error,
     })
 
 

@@ -77,18 +77,30 @@
 <!-- 3D animatsiya -->
 <div class="admin-card">
   <h3>3D fon animatsiyasi</h3>
-  <form method="post" action="/admin/sozlamalar/animatsiya">
+  <form method="post" action="/admin/sozlamalar/animatsiya" enctype="multipart/form-data">
     <div class="form-grid">
       <div class="form-row">
         <label>Animatsiya uslubi</label>
-        <select name="site_animation_style" class="inline-select" style="width:100%;">
+        <select name="site_animation_style" id="anim-style-select" class="inline-select" style="width:100%;" onchange="document.getElementById('anim-image-row').style.display = this.value === 'custom' ? 'block' : 'none';">
           <option value="pills" {% if settings.site_animation_style == 'pills' %}selected{% endif %}>💊 Dorilar (pills)</option>
           <option value="particles" {% if settings.site_animation_style == 'particles' %}selected{% endif %}>✨ Zarrachalar tarmog'i</option>
           <option value="molecules" {% if settings.site_animation_style == 'molecules' %}selected{% endif %}>🧬 Molekulalar</option>
           <option value="waves" {% if settings.site_animation_style == 'waves' %}selected{% endif %}>🌊 To'lqin</option>
+          <option value="custom" {% if settings.site_animation_style == 'custom' %}selected{% endif %}>🖼 Mening rasmim (yuklash)</option>
           <option value="none" {% if settings.site_animation_style == 'none' %}selected{% endif %}>🚫 O'chirilgan</option>
         </select>
         <small>Bu animatsiya endi saytning barcha sahifalarida fon sifatida ishlaydi (faqat bosh sahifada emas).</small>
+      </div>
+      <div class="form-row" id="anim-image-row" style="display:{% if settings.site_animation_style == 'custom' %}block{% else %}none{% endif %};">
+        <label>O'z rasmingizni yuklang</label>
+        {% if settings.site_animation_image_url %}
+        <div style="margin-bottom:10px;">
+          <img src="{{ settings.site_animation_image_url }}" alt="Joriy animatsiya rasmi"
+               style="max-width:200px;max-height:140px;border-radius:12px;object-fit:cover;border:1px solid var(--line);display:block;">
+        </div>
+        {% endif %}
+        <input type="file" name="animation_image" accept=".jpg,.jpeg,.png,.webp,.gif">
+        <small>Rasm yuklansa, u butun sayt bo'ylab suzib-aylanib harakatlanadigan 3D qatlam sifatida qo'llanadi. JPG, PNG, WEBP yoki GIF.</small>
       </div>
     </div>
     <button class="btn btn-primary btn-sm" type="submit">

@@ -12,7 +12,7 @@
 <body{% if settings.site_background_url %} style="--site-bg-image: url('{{ settings.site_background_url }}');" class="has-custom-bg"{% endif %}>
 
 <!-- 3D FON — butun sayt bo'ylab -->
-<canvas id="site-3d" aria-hidden="true" data-style="{{ settings.site_animation_style or 'pills' }}"></canvas>
+<canvas id="site-3d" aria-hidden="true" data-style="{{ settings.site_animation_style or 'pills' }}"{% if settings.site_animation_image_url %} data-image="{{ settings.site_animation_image_url }}"{% endif %}></canvas>
 
 <!-- LOADER -->
 <div id="page-loader" class="page-loader">

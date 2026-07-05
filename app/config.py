@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     site_name: str = Field("PharmBaseUZ", env="SITE_NAME")
     site_background_url: str = Field("", env="SITE_BACKGROUND_URL")
     site_animation_style: str = Field("pills", env="SITE_ANIMATION_STYLE")
+    site_animation_image_url: str = Field("", env="SITE_ANIMATION_IMAGE_URL")
 
     debug: bool = Field(False, env="DEBUG")
     log_level: str = Field("INFO", env="LOG_LEVEL")

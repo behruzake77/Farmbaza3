@@ -273,7 +273,69 @@
     }
   }
 
-  const BUILDERS = { pills: buildPills, particles: buildParticles, molecules: buildMolecules, waves: buildWaves };
+  /* ═══ CUSTOM uslubi — adminning o'z rasmi suzib-aylanadigan 3D bo'laklarga bo'linadi ═══ */
+  function buildCustom() {
+    const imageUrl = canvas.dataset.image;
+    if (!imageUrl) { buildPills(); return; }
+
+    const loader = new THREE.TextureLoader();
+    loader.load(
+      imageUrl,
+      (texture) => {
+        texture.colorSpace = THREE.SRGBColorSpace || texture.colorSpace;
+        const COUNT = 16;
+        for (let i = 0; i < COUNT; i++) {
+          const size = 2.4 + Math.random() * 2.6;
+          const geo = new THREE.PlaneGeometry(size, size);
+          const mat = new THREE.MeshBasicMaterial({
+            map: texture,
+            transparent: true,
+            opacity: 0.5 + Math.random() * 0.3,
+            side: THREE.DoubleSide,
+          });
+          const mesh = new THREE.Mesh(geo, mat);
+
+          mesh.position.set(
+            (Math.random() - 0.5) * 24,
+            (Math.random() - 0.5) * 14,
+            (Math.random() - 0.5) * 10 - 2
+          );
+          mesh.rotation.set(
+            Math.random() * Math.PI * 2,
+            Math.random() * Math.PI * 2,
+            Math.random() * Math.PI * 2
+          );
+          scene.add(mesh);
+
+          const vy = (Math.random() - 0.5) * 0.0035;
+          const vx = (Math.random() - 0.5) * 0.0025;
+          const rx = (Math.random() - 0.5) * 0.006;
+          const ry = (Math.random() - 0.5) * 0.006;
+          const rz = (Math.random() - 0.5) * 0.004;
+          const phase = Math.random() * Math.PI * 2;
+
+          movers.push({
+            mesh,
+            update(t) {
+              mesh.position.y += Math.sin(t * 0.5 + phase) * 0.0015 + vy;
+              mesh.position.x += Math.cos(t * 0.4 + phase * 1.2) * 0.001 + vx;
+              if (mesh.position.y > 8) mesh.position.y = -8;
+              if (mesh.position.y < -8) mesh.position.y = 8;
+              if (mesh.position.x > 13) mesh.position.x = -13;
+              if (mesh.position.x < -13) mesh.position.x = 13;
+              mesh.rotation.x += rx;
+              mesh.rotation.y += ry;
+              mesh.rotation.z += rz;
+            },
+          });
+        }
+      },
+      undefined,
+      () => { buildPills(); }
+    );
+  }
+
+  const BUILDERS = { pills: buildPills, particles: buildParticles, molecules: buildMolecules, waves: buildWaves, custom: buildCustom };
   (BUILDERS[style] || buildPills)();
 
   /* ── Mouse parallax ── */
