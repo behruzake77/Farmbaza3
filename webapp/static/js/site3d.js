@@ -278,61 +278,76 @@
     const imageUrl = canvas.dataset.image;
     if (!imageUrl) { buildPills(); return; }
 
-    const loader = new THREE.TextureLoader();
-    loader.load(
-      imageUrl,
-      (texture) => {
-        texture.colorSpace = THREE.SRGBColorSpace || texture.colorSpace;
-        const COUNT = 16;
-        for (let i = 0; i < COUNT; i++) {
-          const size = 2.4 + Math.random() * 2.6;
-          const geo = new THREE.PlaneGeometry(size, size);
-          const mat = new THREE.MeshBasicMaterial({
-            map: texture,
-            transparent: true,
-            opacity: 0.5 + Math.random() * 0.3,
-            side: THREE.DoubleSide,
-          });
-          const mesh = new THREE.Mesh(geo, mat);
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const COUNT = 13;
+      const srcSize = Math.min(img.naturalWidth, img.naturalHeight) || 256;
 
-          mesh.position.set(
-            (Math.random() - 0.5) * 24,
-            (Math.random() - 0.5) * 14,
-            (Math.random() - 0.5) * 10 - 2
-          );
-          mesh.rotation.set(
-            Math.random() * Math.PI * 2,
-            Math.random() * Math.PI * 2,
-            Math.random() * Math.PI * 2
-          );
-          scene.add(mesh);
+      for (let i = 0; i < COUNT; i++) {
+        // Manba rasmning tasodifiy qismini olib, doira shaklida yumshoq (feather) chetli tasvir yasaymiz
+        const cropFrac = 0.28 + Math.random() * 0.3; // rasmning necha foizini olish
+        const cropSize = srcSize * cropFrac;
+        const maxX = Math.max(0, img.naturalWidth - cropSize);
+        const maxY = Math.max(0, img.naturalHeight - cropSize);
+        const sx = Math.random() * maxX;
+        const sy = Math.random() * maxY;
 
-          const vy = (Math.random() - 0.5) * 0.0035;
-          const vx = (Math.random() - 0.5) * 0.0025;
-          const rx = (Math.random() - 0.5) * 0.006;
-          const ry = (Math.random() - 0.5) * 0.006;
-          const rz = (Math.random() - 0.5) * 0.004;
-          const phase = Math.random() * Math.PI * 2;
+        const OUT = 320;
+        const off = document.createElement('canvas');
+        off.width = OUT; off.height = OUT;
+        const ctx = off.getContext('2d');
+        ctx.drawImage(img, sx, sy, cropSize, cropSize, 0, 0, OUT, OUT);
 
-          movers.push({
-            mesh,
-            update(t) {
-              mesh.position.y += Math.sin(t * 0.5 + phase) * 0.0015 + vy;
-              mesh.position.x += Math.cos(t * 0.4 + phase * 1.2) * 0.001 + vx;
-              if (mesh.position.y > 8) mesh.position.y = -8;
-              if (mesh.position.y < -8) mesh.position.y = 8;
-              if (mesh.position.x > 13) mesh.position.x = -13;
-              if (mesh.position.x < -13) mesh.position.x = 13;
-              mesh.rotation.x += rx;
-              mesh.rotation.y += ry;
-              mesh.rotation.z += rz;
-            },
-          });
-        }
-      },
-      undefined,
-      () => { buildPills(); }
-    );
+        // Chetlarini yumshoq (radial fade) qilib, qattiq burchaklarni yo'qotamiz
+        ctx.globalCompositeOperation = 'destination-in';
+        const grad = ctx.createRadialGradient(OUT / 2, OUT / 2, OUT * 0.14, OUT / 2, OUT / 2, OUT * 0.5);
+        grad.addColorStop(0, 'rgba(255,255,255,1)');
+        grad.addColorStop(0.7, 'rgba(255,255,255,0.85)');
+        grad.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, OUT, OUT);
+        ctx.globalCompositeOperation = 'source-over';
+
+        const texture = new THREE.CanvasTexture(off);
+        const mat = new THREE.SpriteMaterial({
+          map: texture,
+          transparent: true,
+          opacity: 0.4 + Math.random() * 0.22,
+          depthTest: false,
+        });
+        const sprite = new THREE.Sprite(mat);
+        const scale = 2.2 + Math.random() * 2.4;
+        sprite.scale.set(scale, scale, 1);
+        sprite.position.set(
+          (Math.random() - 0.5) * 24,
+          (Math.random() - 0.5) * 14,
+          (Math.random() - 0.5) * 8 - 3
+        );
+        sprite.material.rotation = Math.random() * Math.PI * 2;
+        scene.add(sprite);
+
+        const vy = (Math.random() - 0.5) * 0.003;
+        const vx = (Math.random() - 0.5) * 0.002;
+        const spin = (Math.random() - 0.5) * 0.003;
+        const phase = Math.random() * Math.PI * 2;
+
+        movers.push({
+          mesh: sprite,
+          update(t) {
+            sprite.position.y += Math.sin(t * 0.5 + phase) * 0.0013 + vy;
+            sprite.position.x += Math.cos(t * 0.4 + phase * 1.2) * 0.0009 + vx;
+            if (sprite.position.y > 8) sprite.position.y = -8;
+            if (sprite.position.y < -8) sprite.position.y = 8;
+            if (sprite.position.x > 13) sprite.position.x = -13;
+            if (sprite.position.x < -13) sprite.position.x = 13;
+            sprite.material.rotation += spin;
+          },
+        });
+      }
+    };
+    img.onerror = () => { buildPills(); };
+    img.src = imageUrl;
   }
 
   const BUILDERS = { pills: buildPills, particles: buildParticles, molecules: buildMolecules, waves: buildWaves, custom: buildCustom };
