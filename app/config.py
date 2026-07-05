@@ -1,6 +1,20 @@
 from pydantic_settings import BaseSettings
-from pydantic import Field
+from pydantic import Field, AliasChoices
 from typing import Optional
+from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
+
+
+def _strip_sslmode(url: str) -> str:
+    """asyncpg 'sslmode' so'rov parametrini tushunmaydi (faqat psycopg2 tushunadi).
+    Render/Heroku kabi provayderlar odatda '?sslmode=require' qo'shib beradi —
+    buni asyncpg uchun to'g'ri 'ssl=true' ga aylantiramiz."""
+    parts = urlsplit(url)
+    query = dict(parse_qsl(parts.query))
+    sslmode = query.pop("sslmode", None)
+    if sslmode and sslmode != "disable":
+        query["ssl"] = "true"
+    new_query = urlencode(query)
+    return urlunsplit((parts.scheme, parts.netloc, parts.path, new_query, parts.fragment))
 
 
 class Settings(BaseSettings):
@@ -36,7 +50,9 @@ class Settings(BaseSettings):
     rate_limit_minutes: int = Field(1, env="RATE_LIMIT_MINUTES")
 
     # Render.com to'g'ridan-to'g'ri DATABASE_URL beradi (postgres:// formatida)
-    database_url_override: Optional[str] = Field(None, env="DATABASE_URL")
+    database_url_override: Optional[str] = Field(
+        None, validation_alias=AliasChoices("DATABASE_URL", "database_url_override")
+    )
 
     @property
     def database_url(self) -> str:
@@ -48,7 +64,7 @@ class Settings(BaseSettings):
                 url = url.replace("postgres://", "postgresql+asyncpg://", 1)
             elif url.startswith("postgresql://"):
                 url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
-            return url
+            return _strip_sslmode(url)
         if self.use_sqlite:
             return f"sqlite+aiosqlite:///{self.sqlite_path}"
         return (
