@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 {% block header_search %}{% endblock %}
+{% block title %}{{ site_name }} — O'zbekiston dorilar bazasi{% endblock %}
+{% block meta_description %}O'zbekistondagi eng katta dorilar ma'lumotlar bazasi. 18 000+ dori — narxi, rasmi, tarkibi va to'liq ma'lumoti bilan.{% endblock %}
 
 {% block content %}
 <!-- HERO -->
@@ -12,12 +14,12 @@
           O'zbekiston farmatsevtika bazasi
         </div>
         <h1>Dorini <em>soniyalarda</em><br>toping</h1>
-        <p class="lead">18 000+ dori — narxi, rasmi va tarkibi bilan.<br>GoPharm ma'lumotlari asosida.</p>
+        <p class="lead">18 000+ dori — narxi, rasmi va tarkibi bilan. GoPharm ma'lumotlari asosida real vaqtda qidiruv.</p>
 
         <div class="search-shell">
           <form class="search-box" action="/qidiruv" method="get" id="search-form">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" name="q" id="search-input" placeholder="Masalan: paracetamol, kreon, ibuklin..." autocomplete="off">
+            <input type="text" name="q" id="search-input" placeholder="Dori nomi, ishlab chiqaruvchi yoki tarkib..." autocomplete="off">
             <button type="submit">Qidirish</button>
           </form>
           <div class="suggestions" id="suggestions"></div>
@@ -25,10 +27,11 @@
 
         <div class="hero-hints">
           <span>Ko'p qidiriladi:</span>
-          <a href="/qidiruv?q=paracetamol">paracetamol</a>
-          <a href="/qidiruv?q=ibuprofen">ibuprofen</a>
-          <a href="/qidiruv?q=amoxicillin">amoxicillin</a>
-          <a href="/qidiruv?q=nurofen">nurofen</a>
+          <a href="/qidiruv?q=paracetamol">Paracetamol</a>
+          <a href="/qidiruv?q=ibuprofen">Ibuprofen</a>
+          <a href="/qidiruv?q=amoxicillin">Amoxicillin</a>
+          <a href="/qidiruv?q=vitamin+d">Vitamin D</a>
+          <a href="/qidiruv?q=nurofen">Nurofen</a>
         </div>
 
         <div class="hero-stats">
@@ -41,7 +44,7 @@
             <div class="hero-stat-label">Mahalliy dori</div>
           </div>
           <div class="hero-stat">
-            <div class="hero-stat-num">{{ categories|length or 0 }}</div>
+            <div class="hero-stat-num">{{ categories|length }}</div>
             <div class="hero-stat-label">Kategoriya</div>
           </div>
         </div>
@@ -74,12 +77,13 @@
   </div>
 </section>
 
-<!-- OMMABOP DORILAR -->
+
+<!-- POPULAR MEDICINES -->
 {% if popular %}
-<section class="section" style="padding-top:44px;">
+<section class="section reveal">
   <div class="wrap">
     <div class="section-head">
-      <h2>Ommabop dorilar</h2>
+      <h2>🔥 Ommabop dorilar</h2>
       <a href="/qidiruv" class="see-all">Hammasini ko'rish →</a>
     </div>
     <div class="med-grid">
@@ -94,7 +98,7 @@
           {% endif %}
         </div>
         <div class="med-card-body">
-          {% if d.category %}<span class="badge">{{ d.category }}</span>{% endif %}
+          {% if d.category %}<div class="badge-row"><span class="badge">{{ d.category }}</span></div>{% endif %}
           <div class="med-name">{{ d.name }}</div>
           {% if d.rating_stars %}
           <div class="med-rating"><span class="rating-stars">{{ d.rating_stars }}</span><span class="rating-num">{{ d.rating }}</span></div>
@@ -111,14 +115,12 @@
 </section>
 {% endif %}
 
-<!-- KATEGORIYALAR -->
-<section class="section" id="kategoriyalar" {% if not popular %}style="padding-top:44px;"{% endif %}>
+<!-- CATEGORIES -->
+<section class="section reveal" id="kategoriyalar">
   <div class="wrap">
     <div class="section-head">
-      <h2>Kategoriyalar</h2>
-      {% if total_local %}
-      <span class="count">{{ total_local }} ta mahalliy dori</span>
-      {% endif %}
+      <h2>📂 Kategoriyalar</h2>
+      {% if total_local %}<span class="count">{{ total_local }} ta mahalliy dori</span>{% endif %}
     </div>
     {% if categories %}
     <div class="cat-grid">
@@ -133,10 +135,89 @@
     {% else %}
     <div class="empty-state">
       <div>📂</div>
-      <p>Hozircha kategoriyalar qo'shilmagan.</p>
+      <h3>Kategoriyalar qo'shilmagan</h3>
+      <p>Admin paneldan kategoriyalar qo'shing.</p>
       <a class="btn btn-primary" href="/admin/kategoriyalar" style="margin-top:16px;">Admin panelga o'tish</a>
     </div>
     {% endif %}
+  </div>
+</section>
+
+<!-- STATISTICS -->
+<section class="stats-section reveal">
+  <div class="wrap">
+    <div class="stats-grid">
+      <div class="stats-item">
+        <div class="stats-num">18 000+</div>
+        <div class="stats-label">Dorilar bazada</div>
+      </div>
+      <div class="stats-item">
+        <div class="stats-num">{{ categories|length }}+</div>
+        <div class="stats-label">Kategoriyalar</div>
+      </div>
+      <div class="stats-item">
+        <div class="stats-num">{{ total_local or 0 }}</div>
+        <div class="stats-label">Mahalliy dorilar</div>
+      </div>
+      <div class="stats-item">
+        <div class="stats-num">24/7</div>
+        <div class="stats-label">Onlayn qidiruv</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- FAQ -->
+<section class="faq-section reveal" id="faq">
+  <div class="wrap">
+    <div class="section-head" style="justify-content:center; margin-bottom:36px;">
+      <h2>Ko'p beriladigan savollar</h2>
+    </div>
+    <div class="faq-grid">
+      <div class="faq-item">
+        <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+          {{ site_name }} nima?
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-answer">{{ site_name }} — O'zbekistondagi dorilar haqida ma'lumot beruvchi onlayn platforma. Bu yerda 18 000+ dori haqida narx, rasm, tarkib, ishlab chiqaruvchi va batafsil tavsiflash ma'lumotlarini topishingiz mumkin.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+          Saytdan dori sotib olsa bo'ladimi?
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-answer">Yo'q, {{ site_name }} dori sotmaydi. Bu faqat ma'lumot platformasi. Savatchaga dori qo'shish faqat ro'yxat tuzish uchun — haqiqiy xarid dorixonada amalga oshiriladi.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+          Narxlar qanchalik to'g'ri?
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-answer">Narxlar GoPharm.uz ma'lumotlari asosida yangilanadi, ammo real narx dorixonalarda farq qilishi mumkin. Aniq narx uchun yaqin dorixonaga murojaat qiling.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+          T136 filiali nima?
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-answer">T136 — bu maxsus belgilangan dorixona filiali. T136 belgisi qo'yilgan dorilar shu filialda mavjudligini bildiradi.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+          Qidiruv qanday ishlaydi?
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-answer">Qidiruv tizimimiz dori nomini, ishlab chiqaruvchini, faol moddani va shtrix kodni qidiradi. Shuningdek, xato yozilgan so'zlarni ham tushunadi (masalan: "paratsetamol" → "paracetamol").</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+          Dori haqida ma'lumot qayerdan keladi?
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-answer">Asosiy ma'lumotlar GoPharm.uz API orqali real vaqtda olinadi. Qo'shimcha ma'lumotlar (kategoriya, T136 holati) admin tomonidan qo'shiladi.</div>
+      </div>
+    </div>
   </div>
 </section>
 {% endblock %}

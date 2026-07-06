@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Sevimlilar — {{ site_name }}{% endblock %}
+
+{% block content %}
+<section class="favorites-page">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>❤️ Sevimli dorilar</h2>
+      <span class="count" id="fav-total"></span>
+    </div>
+    <div id="fav-content"></div>
+  </div>
+</section>
+
+<script>
+function renderFavorites() {
+  const container = document.getElementById('fav-content');
+  const items = Favorites.getItems();
+  const totalEl = document.getElementById('fav-total');
+
+  if (!items.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div>❤️</div>
+        <h3>Sevimlilar ro'yxati bo'sh</h3>
+        <p>Dori sahifasida "Sevimli" tugmasini bosib, bu yerda saqlang.</p>
+        <a href="/" class="btn btn-primary" style="margin-top:16px;">Dori qidirish</a>
+      </div>`;
+    totalEl.textContent = '';
+    return;
+  }
+
+  totalEl.textContent = items.length + ' ta dori';
+
+  let html = '<div class="med-grid">';
+  items.forEach(item => {
+    const imgHtml = item.image_url
+      ? `<img class="med-thumb" src="${item.image_url}" alt="${item.name}" loading="lazy" onerror="this.outerHTML='<div class=\\'med-thumb-fallback\\'>${item.name[0]}</div>'">`
+      : `<div class="med-thumb-fallback">${item.name[0]}</div>`;
+
+    html += `
+      <div class="med-card" style="cursor:default;">
+        <div class="med-card-img">${imgHtml}</div>
+        <div class="med-card-body">
+          ${item.category ? `<div class="badge-row"><span class="badge">${item.category}</span></div>` : ''}
+          <a href="${item.url || '#'}" class="med-name" style="color:var(--text);">${item.name}</a>
+          <div class="med-footer">
+            <span class="med-mfr">${item.manufacturer || ''}</span>
+            ${item.price ? `<span class="med-price">${Number(item.price).toLocaleString('uz')} so'm</span>` : ''}
+          </div>
+          <div style="margin-top:8px;display:flex;gap:6px;">
+            <button class="btn btn-sm btn-primary" onclick="Cart.add(${JSON.stringify(item).replace(/"/g, '&quot;')})" style="flex:1;">🛒 Savatga</button>
+            <button class="btn btn-sm btn-outline" onclick="Favorites.remove(${item.id}); renderFavorites();">✕</button>
+          </div>
+        </div>
+      </div>`;
+  });
+  html += '</div>';
+  container.innerHTML = html;
+}
+document.addEventListener('DOMContentLoaded', renderFavorites);
+</script>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Taqqoslash — {{ site_name }}{% endblock %}
+
+{% block content %}
+<section class="compare-page">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>📊 Dorilarni taqqoslash</h2>
+      <span class="count" id="compare-total"></span>
+    </div>
+    <div id="compare-content"></div>
+  </div>
+</section>
+
+<script>
+function renderCompare() {
+  const container = document.getElementById('compare-content');
+  const items = Compare.getItems();
+  const totalEl = document.getElementById('compare-total');
+
+  if (!items.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div>📊</div>
+        <h3>Taqqoslash ro'yxati bo'sh</h3>
+        <p>Dori sahifasida "Taqqoslash" tugmasini bosib, 4 tagacha dori qo'shing.</p>
+        <a href="/" class="btn btn-primary" style="margin-top:16px;">Dori qidirish</a>
+      </div>`;
+    totalEl.textContent = '';
+    return;
+  }
+
+  totalEl.textContent = items.length + ' ta dori';
+
+  const fields = [
+    { key: 'image_url', label: 'Rasm' },
+    { key: 'name', label: 'Nomi' },
+    { key: 'manufacturer', label: 'Ishlab chiqaruvchi' },
+    { key: 'country', label: 'Davlat' },
+    { key: 'category', label: 'Kategoriya' },
+    { key: 'composition', label: 'Faol modda' },
+    { key: 'dosage_form', label: 'Dori shakli' },
+    { key: 'price', label: 'Narx' },
+  ];
+
+  let html = '<div style="overflow-x:auto;"><table class="compare-table"><thead><tr><th></th>';
+  items.forEach(item => { html += `<th style="text-align:center;min-width:180px;">${item.name}</th>`; });
+  html += '</tr></thead><tbody>';
+
+  fields.forEach(field => {
+    html += `<tr><th>${field.label}</th>`;
+    items.forEach(item => {
+      let val = item[field.key] || '—';
+      if (field.key === 'image_url') {
+        val = item.image_url
+          ? `<img src="${item.image_url}" class="compare-img" alt="${item.name}">`
+          : `<div class="med-thumb-fallback" style="width:80px;height:80px;margin:auto;">${item.name[0]}</div>`;
+      } else if (field.key === 'price' && item.price) {
+        val = Number(item.price).toLocaleString('uz') + " so'm";
+      }
+      html += `<td style="text-align:center;">${val}</td>`;
+    });
+    html += '</tr>';
+  });
+
+  // Actions row
+  html += '<tr><th>Amallar</th>';
+  items.forEach(item => {
+    html += `<td style="text-align:center;">
+      <button class="compare-remove-btn" onclick="Compare.remove(${item.id}); renderCompare();">Olib tashlash</button>
+    </td>`;
+  });
+  html += '</tr></tbody></table></div>';
+
+  html += `<div style="margin-top:20px;"><button class="btn btn-outline" onclick="Compare.clear(); renderCompare();">Barchasini tozalash</button></div>`;
+
+  container.innerHTML = html;
+}
+document.addEventListener('DOMContentLoaded', renderCompare);
+</script>
+{% endblock %}

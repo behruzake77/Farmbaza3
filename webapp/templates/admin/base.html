@@ -5,17 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{% block title %}Admin — {{ site_name }}{% endblock %}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
 
-<!-- Sidebar overlay (mobil) -->
+<!-- Sidebar overlay (mobile) -->
 <div class="admin-sidebar-overlay" id="sidebar-overlay"></div>
 
 <div class="admin-shell">
   <aside class="admin-sidebar" id="admin-sidebar">
-    <a href="/" class="brand">
+    <a href="/admin" class="brand">
       <span class="brand-mark">Rx</span>
       <span>{{ site_name }}</span>
     </a>
@@ -48,7 +49,7 @@
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
       Saytni ko'rish
     </a>
-    <a href="/admin/logout" class="admin-link">
+    <a href="/admin/logout" class="admin-link" style="color:rgba(255,100,100,.8);">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       Chiqish
     </a>

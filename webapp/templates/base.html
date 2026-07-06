@@ -3,27 +3,34 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="O'zbekistondagi dorilar ma'lumotlar bazasi — narxi, rasmi va tarkibi bilan">
+<meta name="description" content="{% block meta_description %}O'zbekistondagi dorilar ma'lumotlar bazasi — narxi, rasmi va tarkibi bilan{% endblock %}">
+<meta name="keywords" content="{% block meta_keywords %}dorilar, farmatsevtika, dori narxi, apteka, uzbekistan{% endblock %}">
+<meta property="og:title" content="{% block og_title %}{{ site_name }}{% endblock %}">
+<meta property="og:description" content="{% block og_description %}O'zbekistondagi dorilar ma'lumotlar bazasi{% endblock %}">
+<meta property="og:type" content="website">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="{% block canonical %}{{ request.url }}{% endblock %}">
 <title>{% block title %}{{ site_name }}{% endblock %}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/css/style.css">
+{% block extra_head %}{% endblock %}
 </head>
 <body{% if settings.site_background_url %} style="--site-bg-image: url('{{ settings.site_background_url }}');" class="has-custom-bg"{% endif %}>
 
-<!-- 3D FON — butun sayt bo'ylab -->
+<!-- 3D Background -->
 <canvas id="site-3d" aria-hidden="true" data-style="{{ settings.site_animation_style or 'pills' }}"{% if settings.site_animation_image_url %} data-image="{{ settings.site_animation_image_url }}"{% endif %}></canvas>
 
-<!-- LOADER -->
+<!-- Page Loader -->
 <div id="page-loader" class="page-loader">
   <div class="page-loader-inner">
-    <div class="page-loader-pill">
-      <span class="page-loader-mark">Rx</span>
-    </div>
+    <div class="page-loader-pill"><span class="page-loader-mark">Rx</span></div>
     <div class="page-loader-name">{{ site_name }}</div>
     <div class="page-loader-bar"><span></span></div>
   </div>
 </div>
+
 
 <!-- HEADER -->
 <header class="site-header" id="site-header">
@@ -43,13 +50,34 @@
     </div>
     {% endblock %}
 
+    <!-- Header Actions -->
+    <div class="header-actions">
+      <button class="header-action-btn mobile-show" id="btn-favorites" onclick="window.location='/sevimlilar'" title="Sevimlilar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        <span class="badge-count" id="fav-count">0</span>
+      </button>
+      <button class="header-action-btn" id="btn-compare" onclick="window.location='/taqqoslash'" title="Taqqoslash">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span class="badge-count" id="compare-count">0</span>
+      </button>
+      <button class="header-action-btn mobile-show" id="btn-cart" onclick="window.location='/savatcha'" title="Savatcha">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        <span class="badge-count" id="cart-count">0</span>
+      </button>
+      {% if request.session.get('admin_username') %}
+      <a href="/admin" class="header-action-btn" title="Admin panel" style="color: var(--accent-green);">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68 1.65 1.65 0 0 0 10 3.17V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </a>
+      {% endif %}
+    </div>
+
     <nav class="site-nav">
       <a href="/">Bosh sahifa</a>
       <a href="/#kategoriyalar">Kategoriyalar</a>
-      <a href="/t136">T136 filiali</a>
+      <a href="/t136">T136</a>
     </nav>
 
-    <!-- Mobil burger -->
+    <!-- Mobile burger -->
     <button class="nav-burger" id="nav-burger" aria-label="Menyu">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
         <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
@@ -58,18 +86,46 @@
   </div>
 </header>
 
-<!-- Mobil nav drawer -->
+
+<!-- Mobile Nav Drawer -->
 <div class="nav-drawer" id="nav-drawer">
   <div class="nav-drawer-overlay" id="nav-overlay"></div>
   <div class="nav-drawer-panel">
-    <button class="nav-drawer-close" id="nav-close">✕</button>
-    <a href="/" onclick="closeNav()">Bosh sahifa</a>
-    <a href="/#kategoriyalar" onclick="closeNav()">Kategoriyalar</a>
-    <a href="/t136" onclick="closeNav()">T136 filiali</a>
+    <button class="nav-drawer-close" id="nav-close">&times;</button>
+    <a href="/" onclick="closeNav()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+      Bosh sahifa
+    </a>
+    <a href="/#kategoriyalar" onclick="closeNav()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Kategoriyalar
+    </a>
+    <a href="/t136" onclick="closeNav()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+      T136 filiali
+    </a>
+    <a href="/sevimlilar" onclick="closeNav()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      Sevimlilar
+    </a>
+    <a href="/savatcha" onclick="closeNav()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+      Savatcha
+    </a>
+    <a href="/taqqoslash" onclick="closeNav()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Taqqoslash
+    </a>
+    {% if request.session.get('admin_username') %}
+    <a href="/admin" onclick="closeNav()" style="color: var(--accent-green);">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>
+      Admin panel
+    </a>
+    {% endif %}
   </div>
 </div>
 
-<!-- ASOSIY KONTENT -->
+<!-- MAIN CONTENT -->
 <main>{% block content %}{% endblock %}</main>
 
 <!-- LIGHTBOX -->
@@ -78,25 +134,49 @@
   <img id="img-lightbox-img" src="" alt="">
 </div>
 
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toast-container"></div>
+
+
 <!-- FOOTER -->
 <footer class="site-footer">
-  <div class="wrap footer-inner">
-    <div>
-      <div class="footer-brand">
-        <span class="brand-mark" style="width:32px;height:32px;font-size:12px;">Rx</span>
-        <span class="footer-brand-name">{{ site_name }}</span>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">
+          <span class="brand-mark" style="width:34px;height:34px;font-size:12px;">Rx</span>
+          <span class="footer-brand-name">{{ site_name }}</span>
+        </div>
+        <p class="footer-tagline">O'zbekistondagi eng katta dorilar ma'lumotlar bazasi. 18 000+ dori — narxi, rasmi, tarkibi va batafsil ma'lumoti bilan.</p>
       </div>
-      <p class="footer-tagline">O'zbekistondagi dorilar ma'lumotlar bazasi.<br>18 000+ dori — narxi, rasmi va tarkibi bilan.</p>
+      <div class="footer-col">
+        <h4>Sahifalar</h4>
+        <a href="/">Bosh sahifa</a>
+        <a href="/#kategoriyalar">Kategoriyalar</a>
+        <a href="/qidiruv">Qidiruv</a>
+        <a href="/t136">T136 filiali</a>
+      </div>
+      <div class="footer-col">
+        <h4>Xizmatlar</h4>
+        <a href="/savatcha">Savatcha</a>
+        <a href="/sevimlilar">Sevimlilar</a>
+        <a href="/taqqoslash">Taqqoslash</a>
+      </div>
+      <div class="footer-col">
+        <h4>Ma'lumot</h4>
+        <a href="/#faq">Ko'p beriladigan savollar</a>
+        <a href="/admin/login">Admin kirish</a>
+      </div>
     </div>
-    <div class="footer-right">
-      <p class="footer-note">Narx va mavjudlik dorixonada aniqlanadi. Dori ishlatishdan oldin shifokor bilan maslahatlashing.</p>
-      <p class="footer-copy">© 2025 {{ site_name }} · <a href="/admin/login" style="color:inherit;text-decoration:underline;">Admin</a></p>
+    <div class="footer-bottom">
+      <p class="footer-copy">&copy; 2025 {{ site_name }}. Barcha huquqlar himoyalangan.</p>
+      <p class="footer-copy">Narx va mavjudlik dorixonada aniqlanadi. Dori ishlatishdan oldin shifokor bilan maslahatlashing.</p>
     </div>
   </div>
 </footer>
 
 <script>
-// Scroll shadow
+// Header scroll shadow
 const hdr = document.getElementById('site-header');
 window.addEventListener('scroll', () => {
   hdr.classList.toggle('is-scrolled', window.scrollY > 10);
@@ -106,12 +186,9 @@ window.addEventListener('scroll', () => {
 (function () {
   const loader = document.getElementById('page-loader');
   if (!loader) return;
-  const hide = () => {
-    loader.classList.add('is-hidden');
-    setTimeout(() => loader.remove(), 500);
-  };
-  if (document.readyState === 'complete') setTimeout(hide, 300);
-  else window.addEventListener('load', () => setTimeout(hide, 300));
+  const hide = () => { loader.classList.add('is-hidden'); setTimeout(() => loader.remove(), 400); };
+  if (document.readyState === 'complete') setTimeout(hide, 200);
+  else window.addEventListener('load', () => setTimeout(hide, 200));
 })();
 
 // Lightbox
@@ -120,27 +197,16 @@ window.addEventListener('scroll', () => {
   const lightboxImg = document.getElementById('img-lightbox-img');
   const closeBtn = document.getElementById('img-lightbox-close');
   if (!lightbox || !lightboxImg) return;
-  const open = (src, alt) => {
-    lightboxImg.src = src; lightboxImg.alt = alt || '';
-    lightbox.classList.add('is-open');
-    document.body.style.overflow = 'hidden';
-  };
-  const close = () => {
-    lightbox.classList.remove('is-open');
-    document.body.style.overflow = '';
-    lightboxImg.src = '';
-  };
+  const open = (src, alt) => { lightboxImg.src = src; lightboxImg.alt = alt || ''; lightbox.classList.add('is-open'); document.body.style.overflow = 'hidden'; };
+  const close = () => { lightbox.classList.remove('is-open'); document.body.style.overflow = ''; lightboxImg.src = ''; };
   document.querySelectorAll('[data-lightbox]').forEach(img => img.addEventListener('click', () => open(img.src, img.alt)));
   closeBtn.addEventListener('click', close);
   lightbox.addEventListener('click', e => { if (e.target === lightbox) close(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
 })();
 
-// Mobil nav
-function closeNav() {
-  document.getElementById('nav-drawer').classList.remove('open');
-  document.body.style.overflow = '';
-}
+// Mobile nav
+function closeNav() { document.getElementById('nav-drawer').classList.remove('open'); document.body.style.overflow = ''; }
 (function(){
   const burger = document.getElementById('nav-burger');
   const drawer = document.getElementById('nav-drawer');
@@ -151,9 +217,21 @@ function closeNav() {
   overlay.addEventListener('click', closeNav);
   closeBtn.addEventListener('click', closeNav);
 })();
+
+// Scroll reveal
+(function() {
+  const els = document.querySelectorAll('.reveal');
+  if (!els.length) return;
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+  }, { threshold: 0.1 });
+  els.forEach(el => observer.observe(el));
+})();
 </script>
+<script src="/static/js/cart.js"></script>
 <script src="/static/js/search.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="/static/js/site3d.js"></script>
+{% block extra_scripts %}{% endblock %}
 </body>
 </html>

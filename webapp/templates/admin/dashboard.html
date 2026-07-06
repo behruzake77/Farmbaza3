@@ -9,38 +9,106 @@
 {% endblock %}
 {% block content %}
 
-<div class="stat-grid">
-  <div class="stat-card">
-    <div class="stat-value">{{ total_medicines }}</div>
-    <div class="stat-label">Jami dorilar</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-value">{{ total_categories }}</div>
-    <div class="stat-label">Kategoriyalar</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-value">{{ uncategorized }}</div>
-    <div class="stat-label">Kategoriyasiz</div>
+<!-- Welcome Banner -->
+<div class="admin-card" style="background: linear-gradient(135deg, #0066cc 0%, #004d99 100%); color: #fff; border: none; margin-bottom: 24px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;">
+    <div>
+      <h3 style="color:#fff;font-size:20px;margin-bottom:6px;">Xush kelibsiz, {{ admin }}! 👋</h3>
+      <p style="margin:0;opacity:.8;font-size:14px;">{{ site_name }} boshqaruv paneli. Dorilar, kategoriyalar va sozlamalarni boshqaring.</p>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <a class="btn btn-sm" href="/admin/dorilar/yangi" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.3);">+ Yangi dori</a>
+      <a class="btn btn-sm" href="/" target="_blank" style="background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);">Saytni ko'rish ↗</a>
+    </div>
   </div>
 </div>
 
-<div class="admin-card">
-  <h3>Tez havolalar</h3>
-  <div style="display:flex; gap:10px; flex-wrap:wrap;">
-    <a class="btn btn-outline btn-sm" href="/admin/kategoriyalar">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-      Kategoriyalarni boshqarish
-    </a>
-    <a class="btn btn-outline btn-sm" href="/admin/dorilar?kategoriya=">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
-      Barcha dorilar
-    </a>
-    {% if uncategorized > 0 %}
-    <a class="btn btn-outline btn-sm" href="/admin/dorilar">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      Kategoriyasizlarni to'ldirish
-    </a>
-    {% endif %}
+<!-- Stats Grid -->
+<div class="stat-grid">
+  <div class="stat-card">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div class="stat-value">{{ total_medicines }}</div>
+        <div class="stat-label">Jami dorilar</div>
+      </div>
+      <div style="width:48px;height:48px;border-radius:12px;background:var(--primary-muted);display:flex;align-items:center;justify-content:center;font-size:22px;">💊</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div class="stat-value">{{ total_categories }}</div>
+        <div class="stat-label">Kategoriyalar</div>
+      </div>
+      <div style="width:48px;height:48px;border-radius:12px;background:#ecfdf5;display:flex;align-items:center;justify-content:center;font-size:22px;">📂</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div class="stat-value" style="color:var(--accent-orange);">{{ uncategorized }}</div>
+        <div class="stat-label">Kategoriyasiz</div>
+      </div>
+      <div style="width:48px;height:48px;border-radius:12px;background:#fffbeb;display:flex;align-items:center;justify-content:center;font-size:22px;">⚠️</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div class="stat-value" style="color:var(--accent-green);">18 000+</div>
+        <div class="stat-label">GoPharm baza</div>
+      </div>
+      <div style="width:48px;height:48px;border-radius:12px;background:#ecfdf5;display:flex;align-items:center;justify-content:center;font-size:22px;">🌐</div>
+    </div>
   </div>
 </div>
+
+<!-- Quick Actions -->
+<div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:20px;">
+  <div class="admin-card">
+    <h3>⚡ Tez havolalar</h3>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <a class="btn btn-outline btn-sm" href="/admin/kategoriyalar">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        Kategoriyalar
+      </a>
+      <a class="btn btn-outline btn-sm" href="/admin/dorilar">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18"/></svg>
+        Barcha dorilar
+      </a>
+      <a class="btn btn-outline btn-sm" href="/admin/sozlamalar">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>
+        Sozlamalar
+      </a>
+      {% if uncategorized > 0 %}
+      <a class="btn btn-outline btn-sm" href="/admin/dorilar" style="border-color:var(--accent-orange);color:var(--accent-orange);">
+        ⚠ Kategoriyasizlar ({{ uncategorized }})
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="admin-card">
+    <h3>📊 Ma'lumot</h3>
+    <div style="font-size:14px;color:var(--text-2);line-height:1.8;">
+      <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--line);">
+        <span>Kategoriyali dorilar</span>
+        <strong>{{ total_medicines - uncategorized }}</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--line);">
+        <span>Kategoriyasiz dorilar</span>
+        <strong style="color:var(--accent-orange);">{{ uncategorized }}</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--line);">
+        <span>GoPharm integratsiya</span>
+        <strong style="color:var(--accent-green);">Faol ✓</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:4px 0;">
+        <span>3D animatsiya</span>
+        <strong>{{ settings.site_animation_style }}</strong>
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock %}

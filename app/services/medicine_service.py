@@ -1,3 +1,5 @@
+import re
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, or_
 from app.models.medicine import Medicine
