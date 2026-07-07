@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, PlainTextResponse, Response
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -295,3 +295,83 @@ async def t136_menu(request: Request, db: AsyncSession = Depends(get_db)):
         "site_name": settings.site_name,
         "medicines": medicines,
     })
+
+
+
+# ── Savatcha (Cart) ──────────────────────────────────────────────────────────
+
+@router.get("/savatcha")
+async def cart_page(request: Request):
+    return templates.TemplateResponse("cart.html", {
+        "request":   request,
+        "site_name": settings.site_name,
+    })
+
+
+# ── Sevimlilar (Favorites) ───────────────────────────────────────────────────
+
+@router.get("/sevimlilar")
+async def favorites_page(request: Request):
+    return templates.TemplateResponse("favorites.html", {
+        "request":   request,
+        "site_name": settings.site_name,
+    })
+
+
+# ── Taqqoslash (Compare) ────────────────────────────────────────────────────
+
+@router.get("/taqqoslash")
+async def compare_page(request: Request):
+    return templates.TemplateResponse("compare.html", {
+        "request":   request,
+        "site_name": settings.site_name,
+    })
+
+
+
+# ── SEO: robots.txt ──────────────────────────────────────────────────────────
+
+@router.get("/robots.txt")
+async def robots_txt():
+    content = """User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+
+Sitemap: /sitemap.xml
+"""
+    return PlainTextResponse(content, media_type="text/plain")
+
+
+# ── SEO: sitemap.xml ─────────────────────────────────────────────────────────
+
+@router.get("/sitemap.xml")
+async def sitemap_xml(request: Request, db: AsyncSession = Depends(get_db)):
+    """Dynamic sitemap with all categories and local medicines."""
+    from app.models.category import Category
+    from sqlalchemy import select as sel
+
+    base = str(request.base_url).rstrip("/")
+    urls = [
+        f"  <url><loc>{base}/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>",
+        f"  <url><loc>{base}/qidiruv</loc><changefreq>daily</changefreq><priority>0.8</priority></url>",
+        f"  <url><loc>{base}/t136</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>",
+    ]
+
+    # Categories
+    cats = await db.execute(sel(Category).order_by(Category.nomi))
+    for cat in cats.scalars().all():
+        urls.append(f"  <url><loc>{base}/kategoriya/{cat.id}</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>")
+
+    # Local medicines (first 500)
+    from app.models.medicine import Medicine
+    meds = await db.execute(
+        sel(Medicine.id).where(Medicine.is_active == True).order_by(Medicine.id.desc()).limit(500)
+    )
+    for (mid,) in meds.all():
+        urls.append(f"  <url><loc>{base}/dori/{mid}</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>")
+
+    xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    xml += "\n".join(urls)
+    xml += "\n</urlset>"
+    return Response(content=xml, media_type="application/xml")

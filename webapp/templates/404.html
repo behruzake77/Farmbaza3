@@ -1,12 +1,19 @@
 {% extends "base.html" %}
-{% block title %}404 — {{ site_name }}{% endblock %}
-{% block header_search %}{% endblock %}
+{% block title %}Sahifa topilmadi — {{ site_name }}{% endblock %}
 
 {% block content %}
-<div class="empty-state" style="padding:100px 20px;">
-  <div>🔍</div>
-  <h2 style="font-size:20px;margin:12px 0 8px;">Sahifa topilmadi</h2>
-  <p>Siz qidirayotgan sahifa mavjud emas yoki o'chirilgan.</p>
-  <a href="/" class="btn btn-primary" style="margin-top:20px;">Bosh sahifaga qaytish</a>
-</div>
+<section class="section" style="padding-top:80px; padding-bottom:80px;">
+  <div class="wrap">
+    <div class="empty-state">
+      <div>🔍</div>
+      <h3 style="font-size:48px; margin-bottom:16px; color:var(--primary);">404</h3>
+      <h3>Sahifa topilmadi</h3>
+      <p>Siz qidirayotgan sahifa mavjud emas yoki o'chirilgan.</p>
+      <div style="margin-top:24px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+        <a href="/" class="btn btn-primary">Bosh sahifaga qaytish</a>
+        <a href="/qidiruv" class="btn btn-outline">Dori qidirish</a>
+      </div>
+    </div>
+  </div>
+</section>
 {% endblock %}

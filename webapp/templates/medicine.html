@@ -1,14 +1,39 @@
 {% extends "base.html" %}
 {% block title %}{{ medicine.name }} — {{ site_name }}{% endblock %}
+{% block meta_description %}{{ medicine.name }} — {{ medicine.manufacturer or '' }} | Narxi, tarkibi, qo'llanilishi va batafsil ma'lumot{% endblock %}
+{% block og_title %}{{ medicine.name }} — {{ site_name }}{% endblock %}
+{% block og_description %}{{ medicine.name }}{% if medicine.manufacturer %} — {{ medicine.manufacturer }}{% endif %}. Narxi, tarkibi va batafsil ma'lumot.{% endblock %}
+
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "{{ medicine.name }}",
+  "description": "{{ (medicine.composition or medicine.name)|replace('"', '') }}",
+  {% if medicine.image_url %}"image": "{{ medicine.image_url }}",{% endif %}
+  {% if medicine.manufacturer %}"manufacturer": {"@type": "Organization", "name": "{{ medicine.manufacturer }}"},{% endif %}
+  {% if medicine.category %}"category": "{{ medicine.category }}",{% endif %}
+  {% if medicine.barcode %}"sku": "{{ medicine.barcode }}",{% endif %}
+  {% if medicine.price %}
+  "offers": {
+    "@type": "Offer",
+    "price": "{{ medicine.price }}",
+    "priceCurrency": "UZS",
+    "availability": "https://schema.org/InStock"
+  },
+  {% endif %}
+  "url": "{{ request.url }}"
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <section class="detail-page">
   <div class="wrap">
 
     <nav class="breadcrumb">
-      <a href="/" style="display:flex;align-items:center;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      </a>
+      <a href="/">Bosh sahifa</a>
       <span class="sep">›</span>
       {% if medicine.category %}
       <a href="/qidiruv?q={{ medicine.category }}">{{ medicine.category }}</a>
@@ -17,15 +42,14 @@
       <span>{{ medicine.name }}</span>
     </nav>
 
-    <!-- ═══ YUQORI QISM: rasm + ma'lumot jadvali ═══ -->
+    <!-- TOP SECTION: Image + Info + Action Card -->
     <div class="med-top-grid">
 
-      <!-- Chap: rasm (zoom bilan) -->
+      <!-- Left: Photo -->
       <div class="med-photo-card">
         <div class="med-photo-inner">
           {% if medicine.image_url %}
-          <img class="med-photo-img" src="{{ medicine.image_url }}" alt="{{ medicine.name }}"
-               data-lightbox
+          <img class="med-photo-img" src="{{ medicine.image_url }}" alt="{{ medicine.name }}" data-lightbox
                onerror="this.outerHTML='<div class=\'med-photo-fallback\'>{{ placeholder }}</div>'">
           <span class="med-photo-zoom-hint">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
@@ -43,12 +67,12 @@
         {% endif %}
       </div>
 
-      <!-- O'ng: nom + ma'lumot jadvali -->
+      <!-- Center: Info Table -->
       <div class="med-info-card">
         <div class="badge-row">
           {% if medicine.prescription is not none %}
           <span class="rx-badge {% if medicine.prescription %}rx-yes{% else %}rx-no{% endif %}">
-            {% if medicine.prescription %}⛔ Retsept kerak{% else %}✅ Retseptsiz sotiladi{% endif %}
+            {% if medicine.prescription %}⛔ Retsept kerak{% else %}✅ Retseptsiz{% endif %}
           </span>
           {% endif %}
           {% if medicine.category %}<span class="badge">{{ medicine.category }}</span>{% endif %}
@@ -68,20 +92,18 @@
             <tr><th>Davlat</th><td>{{ medicine.country }}</td></tr>
             {% endif %}
             {% if medicine.composition %}
-            <tr><th>Faol modda</th><td>{{ medicine.composition|truncate(90) }}</td></tr>
+            <tr><th>Faol modda</th><td>{{ medicine.composition|truncate(120) }}</td></tr>
             {% endif %}
             {% if medicine.dosage_form %}
-            <tr><th>Shakli</th><td>{{ medicine.dosage_form }}</td></tr>
+            <tr><th>Dori shakli</th><td>{{ medicine.dosage_form }}</td></tr>
+            {% endif %}
+            {% if medicine.strength %}
+            <tr><th>Dozasi</th><td>{{ medicine.strength }}</td></tr>
             {% endif %}
             {% if medicine.quantity_per_pack %}
-            <tr><th>Qadoqdagi miqdori</th><td>{{ medicine.quantity_per_pack }} dona</td></tr>
+            <tr><th>Qadoqdagi soni</th><td>{{ medicine.quantity_per_pack }} dona</td></tr>
             {% endif %}
-            <tr>
-              <th>Retsept holati</th>
-              <td>
-                {% if medicine.prescription %}Retsept bo'yicha{% elif medicine.prescription is not none %}Retseptsiz{% else %}Noma'lum{% endif %}
-              </td>
-            </tr>
+            <tr><th>Retsept holati</th><td>{% if medicine.prescription %}Retsept bo'yicha{% elif medicine.prescription is not none %}Retseptsiz{% else %}Noma'lum{% endif %}</td></tr>
             {% if medicine.category %}
             <tr><th>Kategoriya</th><td>{{ medicine.category }}</td></tr>
             {% endif %}
@@ -91,9 +113,48 @@
           </tbody>
         </table>
       </div>
+
+
+      <!-- Right: Action Card -->
+      <div class="med-action-card">
+        {% if medicine.price_range_str %}
+        <div style="font-size:12px;color:var(--text-muted);">Narx oralig'i</div>
+        <div class="med-action-price">{{ medicine.price_range_str }}</div>
+        {% elif medicine.price %}
+        <div class="med-action-price">{{ "%.0f"|format(medicine.price) }} so'm</div>
+        {% endif %}
+
+        <div class="med-action-btns">
+          <button class="med-action-btn btn-cart" onclick="addToCart()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+            Savatchaga qo'shish
+          </button>
+          <div class="med-action-row">
+            <button class="med-action-btn btn-fav" id="fav-btn" onclick="toggleFav()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              <span id="fav-text">Sevimli</span>
+            </button>
+            <button class="med-action-btn btn-compare" id="compare-btn" onclick="toggleCompare()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              <span id="compare-text">Taqqoslash</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="med-action-divider"></div>
+
+        <button class="med-action-secondary" onclick="shareMedicine()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          Ulashish
+        </button>
+        <button class="med-action-secondary" onclick="window.print()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Chop etish
+        </button>
+      </div>
     </div>
 
-    <!-- ═══ PASTKI QISM: hujjatlar bo'limi (chap menyu + o'ng kontent) ═══ -->
+    <!-- DOCUMENTATION SECTION -->
     <div class="doc-section" id="doc-section">
       <aside class="doc-nav" id="doc-nav">
         {% for s in doc_sections %}
@@ -131,9 +192,10 @@
       </div>
     </div>
 
-    <!-- Admin: gopharm dorini saqlash -->
+
+    <!-- Admin: GoPharm save form -->
     {% if categories is defined and categories %}
-    <div class="acc-item" style="margin-top:14px;" id="ai-save">
+    <div class="acc-item" style="margin-top:20px;" id="ai-save">
       <button class="acc-head" onclick="tog('save')">
         <span class="acc-icon">💾</span><span class="acc-title">Mahalliy bazaga saqlash</span>
         <svg class="acc-arr" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
@@ -160,12 +222,13 @@
   </div>
 </section>
 
+<!-- ANALOGUES -->
 {% if analogues %}
 <section class="analogues-section">
   <div class="wrap">
     <h2 class="analogues-title">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="12" r="7"/><circle cx="15" cy="12" r="7"/></svg>
-      Analoglar
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="12" r="7"/><circle cx="15" cy="12" r="7"/></svg>
+      O'xshash dorilar
       <span class="analogues-count">{{ analogues|length }} ta</span>
     </h2>
     <div class="analogues-grid">
@@ -173,7 +236,7 @@
       <a class="analogue-card" href="{{ analogue_prefix | default('/gp/') }}{{ a.id }}">
         <div class="analogue-img">
           {% if a.image_url %}
-          <img src="{{ a.image_url }}" alt="{{ a.name }}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <img src="{{ a.image_url }}" alt="{{ a.name }}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
           <div class="analogue-ph" style="display:none">{{ (a.name or '?')[0].upper() }}</div>
           {% else %}
           <div class="analogue-ph">{{ (a.name or '?')[0].upper() }}</div>
@@ -181,15 +244,8 @@
         </div>
         <div class="analogue-info">
           <div class="analogue-name">{{ a.name }}</div>
-          {% if a.rating_stars %}
-          <div class="med-rating"><span class="rating-stars">{{ a.rating_stars }}</span><span class="rating-num">{{ a.rating }}</span></div>
-          {% endif %}
-          {% if a.manufacturer %}
-          <div class="analogue-mfr">{{ a.manufacturer }}</div>
-          {% endif %}
-          {% if a.dosage_form %}
-          <div class="analogue-form">{{ a.dosage_form }}</div>
-          {% endif %}
+          {% if a.manufacturer %}<div class="analogue-mfr">{{ a.manufacturer }}</div>{% endif %}
+          {% if a.dosage_form %}<div class="analogue-form">{{ a.dosage_form }}</div>{% endif %}
         </div>
       </a>
       {% endfor %}
@@ -199,27 +255,51 @@
 {% endif %}
 
 <script>
-function tog(key) {
-  const el = document.getElementById('ai-' + key);
-  if (el) el.classList.toggle('open');
-}
+// Medicine data for cart/favorites/compare
+const medicineData = {
+  id: {{ medicine.id }},
+  name: "{{ medicine.name | replace('"', '\\"') }}",
+  image_url: "{{ medicine.image_url or '' }}",
+  manufacturer: "{{ medicine.manufacturer or '' }}",
+  dosage_form: "{{ medicine.dosage_form or '' }}",
+  category: "{{ medicine.category or '' }}",
+  composition: "{{ (medicine.composition or '')[:100] | replace('"', '\\"') }}",
+  country: "{{ medicine.country or '' }}",
+  price: {{ medicine.price or 0 }},
+  url: window.location.pathname
+};
 
-function showDoc(id, scroll) {
-  document.querySelectorAll('.doc-nav-item').forEach(function (btn) {
-    btn.classList.toggle('active', btn.dataset.doc === id);
-  });
-  document.querySelectorAll('.doc-panel').forEach(function (panel) {
-    panel.classList.toggle('active', panel.id === 'dp-' + id);
-  });
-  if (scroll && window.innerWidth <= 860) {
-    const panel = document.getElementById('dp-' + id);
-    if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+function addToCart() { Cart.add(medicineData); }
+function toggleFav() {
+  const active = Favorites.toggle(medicineData);
+  document.getElementById('fav-btn').classList.toggle('is-active', active);
+  document.getElementById('fav-text').textContent = active ? 'Sevimli ❤' : 'Sevimli';
+}
+function toggleCompare() {
+  const active = Compare.toggle(medicineData);
+  document.getElementById('compare-btn').classList.toggle('is-active', active);
+  document.getElementById('compare-text').textContent = active ? 'Tanlandi ✓' : 'Taqqoslash';
+}
+function shareMedicine() {
+  if (navigator.share) {
+    navigator.share({ title: medicineData.name, url: window.location.href });
+  } else {
+    navigator.clipboard.writeText(window.location.href);
+    showToast('Havola nusxalandi!', 'info');
   }
 }
-
-document.addEventListener('DOMContentLoaded', function () {
-  var firstNav = document.querySelector('.doc-nav-item');
-  if (firstNav) showDoc(firstNav.dataset.doc, false);
+function tog(key) { document.getElementById('ai-' + key)?.classList.toggle('open'); }
+function showDoc(id, scroll) {
+  document.querySelectorAll('.doc-nav-item').forEach(btn => btn.classList.toggle('active', btn.dataset.doc === id));
+  document.querySelectorAll('.doc-panel').forEach(panel => panel.classList.toggle('active', panel.id === 'dp-' + id));
+  if (scroll && window.innerWidth <= 900) {
+    document.getElementById('dp-' + id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+// Init state
+document.addEventListener('DOMContentLoaded', () => {
+  if (Favorites.has(medicineData.id)) { document.getElementById('fav-btn').classList.add('is-active'); document.getElementById('fav-text').textContent = 'Sevimli ❤'; }
+  if (Compare.has(medicineData.id)) { document.getElementById('compare-btn').classList.add('is-active'); document.getElementById('compare-text').textContent = 'Tanlandi ✓'; }
 });
 </script>
 {% endblock %}

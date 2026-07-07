@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Savatcha — {{ site_name }}{% endblock %}
+
+{% block content %}
+<section class="cart-page">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>🛒 Savatcha</h2>
+      <span class="count" id="cart-total-qty"></span>
+    </div>
+
+    <div id="cart-content">
+      <!-- Rendered by JS -->
+    </div>
+  </div>
+</section>
+
+<script>
+function renderCart() {
+  const container = document.getElementById('cart-content');
+  const items = Cart.getItems();
+  const qtyEl = document.getElementById('cart-total-qty');
+
+  if (!items.length) {
+    container.innerHTML = `
+      <div class="cart-empty">
+        <div class="cart-empty-icon">🛒</div>
+        <h2>Savatcha bo'sh</h2>
+        <p>Dorilarni savatga qo'shish uchun qidiruv qiling va "Savatchaga qo'shish" tugmasini bosing.</p>
+        <a href="/" class="btn btn-primary" style="margin-top:16px;">Bosh sahifaga qaytish</a>
+      </div>`;
+    qtyEl.textContent = '';
+    return;
+  }
+
+  qtyEl.textContent = Cart.getTotalQty() + ' ta dori';
+
+  let html = '<div class="cart-items">';
+  items.forEach(item => {
+    const imgHtml = item.image_url
+      ? `<img src="${item.image_url}" alt="${item.name}" onerror="this.outerHTML='<div class=\\'med-thumb-fallback\\'>${item.name[0]}</div>'">`
+      : `<div class="med-thumb-fallback">${item.name[0]}</div>`;
+    const subtotal = item.price ? (item.price * item.qty).toLocaleString('uz') + " so'm" : '';
+
+    html += `
+      <div class="cart-item">
+        <div class="cart-item-img">${imgHtml}</div>
+        <div class="cart-item-info">
+          <a href="${item.url || '#'}" class="cart-item-name">${item.name}</a>
+          <div class="cart-item-meta">${[item.manufacturer, item.dosage_form].filter(Boolean).join(' • ')}</div>
+          ${subtotal ? `<div style="font-size:13px;color:var(--primary);font-weight:700;margin-top:4px;">${subtotal}</div>` : ''}
+        </div>
+        <div class="cart-item-qty">
+          <button class="cart-qty-btn" onclick="Cart.updateQty(${item.id}, -1); renderCart();">−</button>
+          <span class="cart-qty-val">${item.qty}</span>
+          <button class="cart-qty-btn" onclick="Cart.updateQty(${item.id}, 1); renderCart();">+</button>
+        </div>
+        <button class="cart-item-remove" onclick="Cart.remove(${item.id}); renderCart(); showToast('Olib tashlandi', 'info');">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </button>
+      </div>`;
+  });
+  html += '</div>';
+
+  // Summary
+  const total = Cart.getTotal();
+  const totalQty = Cart.getTotalQty();
+  html += `
+    <div class="cart-summary">
+      <div class="cart-summary-row"><span>Jami dorilar soni:</span><span>${totalQty} ta</span></div>
+      ${total > 0 ? `<div class="cart-summary-row cart-summary-total"><span>Taxminiy narx:</span><span>${total.toLocaleString('uz')} so'm</span></div>` : ''}
+      <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn btn-outline" onclick="Cart.clear(); renderCart(); showToast('Savatcha tozalandi', 'info');">Tozalash</button>
+      </div>
+    </div>`;
+
+  container.innerHTML = html;
+}
+document.addEventListener('DOMContentLoaded', renderCart);
+</script>
+{% endblock %}

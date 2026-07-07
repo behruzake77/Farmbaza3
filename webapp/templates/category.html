@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ category.nomi }} — {{ site_name }}{% endblock %}
+{% block meta_description %}{{ category.nomi }} kategoriyasidagi dorilar — {{ medicines|length }} ta dori mavjud{% endblock %}
 
 {% block content %}
 <section class="section" style="padding-top:32px;">
@@ -18,9 +19,29 @@
     </div>
 
     {% if medicines %}
-    <div class="med-grid">
+    <!-- Toolbar -->
+    <div class="category-toolbar">
+      <div class="category-filters">
+        <select class="filter-select" id="sort-select" onchange="sortMedicines()">
+          <option value="name">Nomi bo'yicha (A-Z)</option>
+          <option value="name-desc">Nomi bo'yicha (Z-A)</option>
+          <option value="price-asc">Narx: past → yuqori</option>
+          <option value="price-desc">Narx: yuqori → past</option>
+        </select>
+      </div>
+      <div class="view-toggle">
+        <button class="view-toggle-btn active" id="grid-btn" onclick="setView('grid')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        </button>
+        <button class="view-toggle-btn" id="list-btn" onclick="setView('list')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="med-grid" id="med-grid">
       {% for m in medicines %}
-      <a class="med-card" href="/dori/{{ m.id }}">
+      <a class="med-card" href="/dori/{{ m.id }}" data-name="{{ m.name }}" data-price="{{ m.price or 0 }}">
         <div class="med-card-img">
           {% if m.image_url %}
           <img class="med-thumb" src="{{ m.image_url }}" alt="{{ m.name }}" loading="lazy"
@@ -30,9 +51,7 @@
           {% endif %}
         </div>
         <div class="med-card-body">
-          {% if m.t136_filial %}
-          <div class="badge-row"><span class="badge badge-t136">T136</span></div>
-          {% endif %}
+          {% if m.t136_filial %}<div class="badge-row"><span class="badge badge-t136">T136</span></div>{% endif %}
           <div class="med-name">{{ m.name }}</div>
           <div class="med-footer">
             <span class="med-mfr">{{ m.manufacturer or "" }}</span>
@@ -45,10 +64,44 @@
     {% else %}
     <div class="empty-state">
       <div>📦</div>
+      <h3>Dorilar topilmadi</h3>
       <p>Bu kategoriyada hali dori yo'q.</p>
-      <a class="btn btn-outline" href="/admin/dorilar" style="margin-top:20px;">Admin panel</a>
+      <a class="btn btn-primary" href="/" style="margin-top:20px;">Bosh sahifaga qaytish</a>
     </div>
     {% endif %}
   </div>
 </section>
+
+<script>
+function setView(mode) {
+  const grid = document.getElementById('med-grid');
+  const gridBtn = document.getElementById('grid-btn');
+  const listBtn = document.getElementById('list-btn');
+  if (mode === 'list') {
+    grid.classList.add('list-view');
+    listBtn.classList.add('active');
+    gridBtn.classList.remove('active');
+  } else {
+    grid.classList.remove('list-view');
+    gridBtn.classList.add('active');
+    listBtn.classList.remove('active');
+  }
+}
+
+function sortMedicines() {
+  const grid = document.getElementById('med-grid');
+  const sort = document.getElementById('sort-select').value;
+  const cards = Array.from(grid.querySelectorAll('.med-card'));
+
+  cards.sort((a, b) => {
+    if (sort === 'name') return a.dataset.name.localeCompare(b.dataset.name);
+    if (sort === 'name-desc') return b.dataset.name.localeCompare(a.dataset.name);
+    if (sort === 'price-asc') return (parseFloat(a.dataset.price) || 99999) - (parseFloat(b.dataset.price) || 99999);
+    if (sort === 'price-desc') return (parseFloat(b.dataset.price) || 0) - (parseFloat(a.dataset.price) || 0);
+    return 0;
+  });
+
+  cards.forEach(card => grid.appendChild(card));
+}
+</script>
 {% endblock %}
